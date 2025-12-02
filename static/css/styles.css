@@ -1,0 +1,560 @@
+/* Reset y Variables */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #00a86b;
+    --primary-dark: #008c59;
+    --secondary-color: #2c3e50;
+    --accent-color: #e74c3c;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --bg-color: #f5f7fa;
+    --card-bg: #ffffff;
+    --text-color: #2c3e50;
+    --text-light: #7f8c8d;
+    --border-color: #dfe6e9;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+header h1 {
+    font-size: 2em;
+    font-weight: 600;
+}
+
+nav {
+    display: flex;
+    gap: 15px;
+}
+
+/* Botones */
+.btn-primary, .btn-secondary, .btn-reservar, .btn-cancelar {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #34495e;
+    transform: translateY(-2px);
+}
+
+.btn-reservar {
+    background-color: var(--success-color);
+    color: white;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-reservar:hover {
+    background-color: #229954;
+    transform: scale(1.02);
+}
+
+.btn-cancelar {
+    background-color: var(--accent-color);
+    color: white;
+    width: 100%;
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+
+.btn-cancelar:hover {
+    background-color: #c0392b;
+}
+
+/* Selector de Fecha */
+.fecha-selector {
+    background-color: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.fecha-selector label {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: var(--text-color);
+}
+
+.fecha-selector input[type="date"] {
+    padding: 10px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.fecha-selector input[type="date"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Sección de Horarios */
+.horarios-section {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow);
+}
+
+.horarios-section h2 {
+    margin-bottom: 25px;
+    color: var(--text-color);
+    font-size: 1.5em;
+}
+
+.horarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.horario-btn {
+    background-color: #ecf0f1;
+    border: 2px solid var(--border-color);
+    padding: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.horario-btn:hover {
+    background-color: #d5dbdb;
+    border-color: var(--primary-color);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+.horario-btn.selected {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-dark);
+    transform: scale(1.05);
+}
+
+.horario-time {
+    display: block;
+    font-size: 1.2em;
+}
+
+.semaforo {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.3em;
+    animation: pulse 2s infinite;
+}
+
+.semaforo.rojo {
+    filter: drop-shadow(0 0 3px rgba(231, 76, 60, 0.6));
+}
+
+.semaforo.amarillo {
+    filter: drop-shadow(0 0 3px rgba(243, 156, 18, 0.6));
+}
+
+.semaforo.verde {
+    filter: drop-shadow(0 0 3px rgba(39, 174, 96, 0.6));
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.horario-btn {
+    position: relative;
+}
+
+/* Sección de Canchas */
+.canchas-section {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.canchas-section h2 {
+    margin-bottom: 25px;
+    color: var(--text-color);
+    font-size: 1.5em;
+}
+
+.canchas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.cancha-card {
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.cancha-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.cancha-card.disponible {
+    border-color: var(--success-color);
+}
+
+.cancha-card.reservada {
+    border-color: var(--accent-color);
+    opacity: 0.85;
+}
+
+.cancha-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.cancha-header h3 {
+    font-size: 1.3em;
+    color: var(--text-color);
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.status-badge.disponible {
+    background-color: #d5f4e6;
+    color: var(--success-color);
+}
+
+.status-badge.reservada {
+    background-color: #fadbd8;
+    color: var(--accent-color);
+}
+
+.cancha-imagen {
+    width: 100%;
+    height: 200px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.cancha-imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.cancha-card:hover .cancha-imagen img {
+    transform: scale(1.05);
+}
+
+.cancha-imagen.reservada-overlay {
+    position: relative;
+}
+
+.cancha-imagen .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3em;
+}
+
+.reserva-info-card {
+    background-color: #fef5e7;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.reserva-info-card p {
+    margin: 5px 0;
+    font-size: 0.95em;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    margin: 5% auto;
+    padding: 40px;
+    border-radius: 15px;
+    max-width: 500px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close {
+    color: var(--text-light);
+    float: right;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: var(--accent-color);
+}
+
+.modal-content h2 {
+    margin-bottom: 25px;
+    color: var(--text-color);
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.label-icon {
+    margin-right: 8px;
+    font-size: 1.2em;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: var(--text-light);
+    font-size: 0.9em;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.reserva-info {
+    background-color: var(--bg-color);
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.reserva-info p {
+    margin: 8px 0;
+    font-size: 1em;
+}
+
+/* Configuración */
+.config-card {
+    background-color: var(--card-bg);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+}
+
+.config-card h2 {
+    margin-bottom: 30px;
+    color: var(--text-color);
+    font-size: 1.8em;
+}
+
+.config-preview {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.config-preview h3 {
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+#preview p {
+    margin: 15px 0;
+    font-size: 1.1em;
+    color: var(--text-color);
+}
+
+/* Mensajes */
+.mensaje {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-weight: 600;
+    animation: slideDown 0.3s ease;
+}
+
+.mensaje.success {
+    background-color: #d5f4e6;
+    color: var(--success-color);
+    border: 2px solid var(--success-color);
+}
+
+.mensaje.error {
+    background-color: #fadbd8;
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    header h1 {
+        font-size: 1.5em;
+    }
+    
+    .horarios-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .canchas-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        margin: 20% auto;
+        padding: 25px;
+    }
+}

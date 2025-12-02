@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - Sistema de Turnos Pádel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Configuración del Sistema</h1>
+            <nav>
+                <a href="/" class="btn-secondary">← Volver a Turnos</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="config-card">
+                <h2>Personalizar Sistema de Turnos</h2>
+                <form id="configForm">
+                    <div class="form-group">
+                        <label for="cantidad_canchas">
+                            <span class="label-icon">🎾</span>
+                            Cantidad de Canchas
+                        </label>
+                        <input type="number" 
+                               id="cantidad_canchas" 
+                               name="cantidad_canchas" 
+                               min="1" 
+                               max="10" 
+                               value="{{ config.cantidad_canchas }}" 
+                               required>
+                        <small>Número de canchas disponibles (1-10)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="horario_inicio">
+                            <span class="label-icon">🌅</span>
+                            Horario de Inicio
+                        </label>
+                        <input type="time" 
+                               id="horario_inicio" 
+                               name="horario_inicio" 
+                               value="{{ config.horario_inicio }}" 
+                               required>
+                        <small>Hora de apertura del club</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="horario_fin">
+                            <span class="label-icon">🌙</span>
+                            Horario de Cierre
+                        </label>
+                        <input type="time" 
+                               id="horario_fin" 
+                               name="horario_fin" 
+                               value="{{ config.horario_fin }}" 
+                               required>
+                        <small>Hora de cierre del club</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duracion_turno">
+                            <span class="label-icon">⏱️</span>
+                            Duración de Turno (minutos)
+                        </label>
+                        <select id="duracion_turno" name="duracion_turno" required>
+                            <option value="60" {% if config.duracion_turno == 60 %}selected{% endif %}>60 minutos</option>
+                            <option value="90" {% if config.duracion_turno == 90 %}selected{% endif %}>90 minutos</option>
+                            <option value="120" {% if config.duracion_turno == 120 %}selected{% endif %}>120 minutos</option>
+                        </select>
+                        <small>Duración de cada turno de juego</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            💾 Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+
+                <div id="mensaje" class="mensaje" style="display: none;"></div>
+            </div>
+
+            <div class="config-preview">
+                <h3>Vista Previa</h3>
+                <div id="preview">
+                    <p>📊 Se generarán aproximadamente <strong id="cantidadTurnos">0</strong> turnos por día</p>
+                    <p>🎾 Con <strong id="cantidadCanchas">{{ config.cantidad_canchas }}</strong> canchas disponibles</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/configuracion.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Turnos - Pádel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎾 Sistema de Reserva de Turnos - Pádel</h1>
+            <nav>
+                <a href="/configuracion" class="btn-secondary">⚙️ Configuración</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Selector de Fecha -->
+            <div class="fecha-selector">
+                <label for="fecha">📅 Seleccionar Fecha:</label>
+                <input type="date" id="fecha" name="fecha" value="">
+                <button onclick="actualizarTodosSemaforos()" class="btn-primary" style="margin-left: 15px;">
+                    🔄 Actualizar Disponibilidad
+                </button>
+            </div>
+
+            <!-- Sección de Horarios -->
+            <section class="horarios-section">
+                <h2>Seleccionar Horario</h2>
+                <div class="horarios-grid">
+                    {% for horario in horarios %}
+                    <button class="horario-btn" data-horario="{{ horario }}">
+                        <span class="horario-time">⏰ {{ horario }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Sección de Canchas -->
+            <section class="canchas-section" id="canchasSection" style="display: none;">
+                <h2>Canchas Disponibles - <span id="horarioSeleccionado"></span></h2>
+                <div class="canchas-grid" id="canchasGrid">
+                    <!-- Las canchas se cargarán dinámicamente con JavaScript -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para reserva -->
+    <div id="modalReserva" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Reservar Turno</h2>
+            <form id="formReserva">
+                <div class="form-group">
+                    <label for="nombreCliente">Nombre del Cliente:</label>
+                    <input type="text" id="nombreCliente" name="nombreCliente" required>
+                </div>
+                <div class="reserva-info">
+                    <p><strong>Fecha:</strong> <span id="infoFecha"></span></p>
+                    <p><strong>Horario:</strong> <span id="infoHorario"></span></p>
+                    <p><strong>Cancha:</strong> <span id="infoCancha"></span></p>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">✅ Confirmar Reserva</button>
+                    <button type="button" class="btn-secondary" onclick="cerrarModal()">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Pasar datos de configuración a JavaScript
+        const CONFIG = {
+            cantidad_canchas: {{ config.cantidad_canchas }}
+        };
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
