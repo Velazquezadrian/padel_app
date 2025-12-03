@@ -260,9 +260,6 @@ def cancelar_reserva():
     """API para cancelar una reserva"""
     try:
         data = request.get_json()
-        fecha = data.get('fecha', datetime.now().strftime('%Y-%m-%d'))
-        horario = data['horario']
-        cancha_id = data['cancha_id']
         id_turno_fijo = data.get('id_turno_fijo')
         
         # Si es un turno fijo, eliminarlo
@@ -275,29 +272,40 @@ def cancelar_reserva():
                 'success': True,
                 'message': 'Turno fijo eliminado correctamente'
             })
-        else:
-            # Cancelar reserva normal
-            reservas = cargar_reservas()
-            clave_fecha_hora = f"{fecha}_{horario}"
+        
+        # Si no es turno fijo, cancelar reserva normal
+        fecha = data.get('fecha', datetime.now().strftime('%Y-%m-%d'))
+        horario = data.get('horario')
+        cancha_id = data.get('cancha_id')
+        
+        if not horario or not cancha_id:
+            return jsonify({
+                'success': False,
+                'message': 'Faltan datos para cancelar la reserva'
+            }), 400
+        
+        # Cancelar reserva normal
+        reservas = cargar_reservas()
+        clave_fecha_hora = f"{fecha}_{horario}"
+        
+        if clave_fecha_hora in reservas and cancha_id in reservas[clave_fecha_hora]:
+            del reservas[clave_fecha_hora][cancha_id]
             
-            if clave_fecha_hora in reservas and cancha_id in reservas[clave_fecha_hora]:
-                del reservas[clave_fecha_hora][cancha_id]
-                
-                # Limpiar si no hay más reservas en ese horario
-                if not reservas[clave_fecha_hora]:
-                    del reservas[clave_fecha_hora]
-                
-                guardar_reservas(reservas)
-                
-                return jsonify({
-                    'success': True,
-                    'message': 'Reserva cancelada correctamente'
-                })
-            else:
-                return jsonify({
-                    'success': False,
-                    'message': 'No se encontró la reserva'
-                }), 404
+            # Limpiar si no hay más reservas en ese horario
+            if not reservas[clave_fecha_hora]:
+                del reservas[clave_fecha_hora]
+            
+            guardar_reservas(reservas)
+            
+            return jsonify({
+                'success': True,
+                'message': 'Reserva cancelada correctamente'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'No se encontró la reserva'
+            }), 404
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
