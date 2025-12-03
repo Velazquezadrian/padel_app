@@ -16,6 +16,7 @@ venv.bak/
 config.json
 reservas.json
 turnos_fijos.json
+ausencias.json
 
 # Logs
 *.log

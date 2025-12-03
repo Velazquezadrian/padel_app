@@ -291,6 +291,48 @@ nav {
     opacity: 0.85;
 }
 
+.cancha-card.turno-fijo-ausente {
+    border-color: #17a2b8;
+    background: linear-gradient(135deg, #ffffff, #e7f6f8);
+}
+
+.turno-fijo-info {
+    padding: 15px;
+    background-color: #d1ecf1;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.turno-fijo-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.ausencia-text {
+    color: #856404;
+    font-weight: 600;
+    margin-top: 10px !important;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
 .cancha-header {
     display: flex;
     justify-content: space-between;
@@ -318,6 +360,12 @@ nav {
 .status-badge.reservada {
     background-color: #fadbd8;
     color: var(--accent-color);
+}
+
+.status-badge.turno-fijo-ausente {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 2px solid #bee5eb;
 }
 
 .cancha-imagen {

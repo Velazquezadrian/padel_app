@@ -170,9 +170,34 @@ function mostrarCanchas(canchas) {
     
     canchas.forEach((cancha) => {
         const canchaDiv = document.createElement('div');
-        canchaDiv.className = `cancha-card ${cancha.disponible ? 'disponible' : 'reservada'}`;
         
-        if (cancha.disponible) {
+        // Verificar si es turno fijo ausente
+        if (cancha.turno_fijo_ausente) {
+            canchaDiv.className = 'cancha-card turno-fijo-ausente';
+            canchaDiv.innerHTML = `
+                <div class="cancha-header">
+                    <h3>Cancha ${cancha.numero}</h3>
+                    <span class="status-badge turno-fijo-ausente">🔁 Ausente</span>
+                </div>
+                <div class="cancha-imagen">
+                    <img src="/static/images/Padel.jpg" 
+                         alt="Cancha ${cancha.numero}"
+                         onerror="this.src='/static/images/cancha-default.svg'">
+                </div>
+                <div class="turno-fijo-info">
+                    <p><strong>Turno fijo de:</strong> ${cancha.turno_fijo_ausente.nombre}</p>
+                    ${cancha.turno_fijo_ausente.telefono ? `<p><strong>📞:</strong> ${cancha.turno_fijo_ausente.telefono}</p>` : ''}
+                    <p class="ausencia-text">⚠️ Marcado como ausente para hoy</p>
+                </div>
+                <button class="btn-reservar" onclick="abrirModalReserva('${cancha.id}', ${cancha.numero})">
+                    ✅ Reservar (Temporal)
+                </button>
+                <button class="btn-secondary" onclick="cancelarAusencia('${cancha.id}', ${cancha.numero}, ${cancha.turno_fijo_ausente.id_turno_fijo})" style="margin-top: 10px;">
+                    🔄 Restaurar Turno Fijo
+                </button>
+            `;
+        } else if (cancha.disponible) {
+            canchaDiv.className = 'cancha-card disponible';
             canchaDiv.innerHTML = `
                 <div class="cancha-header">
                     <h3>Cancha ${cancha.numero}</h3>
@@ -188,6 +213,7 @@ function mostrarCanchas(canchas) {
                 </button>
             `;
         } else {
+            canchaDiv.className = 'cancha-card reservada';
             const esFijo = cancha.reserva.es_fijo || false;
             const idTurnoFijo = cancha.reserva.id_turno_fijo || null;
             
@@ -204,7 +230,11 @@ function mostrarCanchas(canchas) {
                 </div>
                 <div class="reserva-info-card">
                     <p><strong>Reservado por:</strong> ${cancha.reserva.nombre}</p>
+                    ${cancha.reserva.telefono ? `<p><strong>📞 Teléfono:</strong> ${cancha.reserva.telefono}</p>` : ''}
                     ${esFijo ? '<p class="turno-fijo-badge">🔁 Turno Fijo Semanal</p>' : ''}
+                    ${esFijo ? `<button class="btn-warning" onclick="marcarAusencia('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})" style="margin-bottom: 10px;">
+                        ⚠️ Marcar Ausencia
+                    </button>` : ''}
                     <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})">
                         ❌ ${esFijo ? 'Eliminar Turno Fijo' : 'Cancelar Reserva'}
                     </button>
@@ -245,16 +275,23 @@ function abrirModalReserva(canchaId, numeroCancha) {
 function cerrarModal() {
     document.getElementById('modalReserva').style.display = 'none';
     document.getElementById('nombreCliente').value = '';
+    document.getElementById('telefonoCliente').value = '';
     document.getElementById('esFijo').checked = false;
     document.getElementById('diaSemanaMensaje').style.display = 'none';
 }
 
 async function realizarReserva() {
     const nombreCliente = document.getElementById('nombreCliente').value;
+    const telefonoCliente = document.getElementById('telefonoCliente').value;
     const esFijo = document.getElementById('esFijo').checked;
     
     if (!nombreCliente) {
         alert('Por favor ingrese un nombre');
+        return;
+    }
+    
+    if (!telefonoCliente) {
+        alert('Por favor ingrese un teléfono');
         return;
     }
     
@@ -268,6 +305,7 @@ async function realizarReserva() {
                 horario: horarioSeleccionado,
                 cancha_id: canchaSeleccionada,
                 nombre_cliente: nombreCliente,
+                telefono_cliente: telefonoCliente,
                 fecha: fechaSeleccionada,
                 es_fijo: esFijo
             })
@@ -363,6 +401,7 @@ function mostrarTurnosFijos(turnos) {
                     <h4>🔁 ${turno.dia_nombre} - ${turno.horario}</h4>
                     <p><strong>Cancha:</strong> ${turno.cancha_id.replace('cancha_', '')}</p>
                     <p><strong>Cliente:</strong> ${turno.nombre_cliente}</p>
+                    ${turno.telefono_cliente ? `<p><strong>📞 Teléfono:</strong> ${turno.telefono_cliente}</p>` : ''}
                 </div>
                 <button class="btn-cancelar" onclick="eliminarTurnoFijo(${turno.id})">
                     🗑️ Eliminar
@@ -397,6 +436,71 @@ async function eliminarTurnoFijo(idTurno) {
             alert('✅ ' + data.message);
             abrirModalTurnosFijos(); // Recargar lista
             actualizarTodosSemaforos();
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+async function marcarAusencia(canchaId, numeroCancha, idTurnoFijo) {
+    if (!confirm(`¿Marcar ausencia para esta fecha?\n\nLa cancha ${numeroCancha} quedará disponible solo para hoy, pero el turno fijo se mantendrá para las próximas semanas.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/marcar_ausencia', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fecha: fechaSeleccionada,
+                horario: horarioSeleccionado,
+                cancha_id: canchaId,
+                id_turno_fijo: idTurnoFijo
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ ' + data.message);
+            cargarCanchas(horarioSeleccionado);
+            setTimeout(() => actualizarTodosSemaforos(), 300);
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+async function cancelarAusencia(canchaId, numeroCancha, idTurnoFijo) {
+    if (!confirm(`¿Restaurar el turno fijo para esta fecha?\n\nLa cancha ${numeroCancha} volverá a estar ocupada por el turno fijo.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/cancelar_ausencia', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fecha: fechaSeleccionada,
+                horario: horarioSeleccionado,
+                cancha_id: canchaId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ ' + data.message);
+            cargarCanchas(horarioSeleccionado);
+            setTimeout(() => actualizarTodosSemaforos(), 300);
         } else {
             alert('❌ ' + data.message);
         }

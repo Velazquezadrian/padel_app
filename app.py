@@ -10,6 +10,7 @@ app.secret_key = 'tu_clave_secreta_aqui_cambiar_en_produccion'
 CONFIG_FILE = 'config.json'
 RESERVAS_FILE = 'reservas.json'
 TURNOS_FIJOS_FILE = 'turnos_fijos.json'
+AUSENCIAS_FILE = 'ausencias.json'
 
 def cargar_config():
     """Carga la configuración del sistema"""
@@ -53,23 +54,50 @@ def guardar_turnos_fijos(turnos_fijos):
     with open(TURNOS_FIJOS_FILE, 'w', encoding='utf-8') as f:
         json.dump(turnos_fijos, f, indent=4)
 
+def cargar_ausencias():
+    """Carga las ausencias de turnos fijos"""
+    if os.path.exists(AUSENCIAS_FILE):
+        with open(AUSENCIAS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return []
+
+def guardar_ausencias(ausencias):
+    """Guarda las ausencias"""
+    with open(AUSENCIAS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(ausencias, f, indent=4)
+
 def aplicar_turnos_fijos(fecha, horario, canchas):
     """Aplica turnos fijos a la disponibilidad de canchas"""
     turnos_fijos = cargar_turnos_fijos()
+    ausencias = cargar_ausencias()
     fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
     dia_semana = fecha_obj.weekday()  # 0=Lunes, 6=Domingo
     
     for turno in turnos_fijos:
         if turno['dia_semana'] == dia_semana and turno['horario'] == horario:
+            # Verificar si hay una ausencia para esta fecha
+            clave_ausencia = f"{fecha}_{horario}_{turno['cancha_id']}"
+            tiene_ausencia = any(a['clave'] == clave_ausencia for a in ausencias)
+            
             # Buscar la cancha y marcarla como ocupada por el turno fijo
             for cancha in canchas:
                 if cancha['id'] == turno['cancha_id']:
-                    cancha['disponible'] = False
-                    cancha['reserva'] = {
-                        'nombre': turno['nombre_cliente'],
-                        'es_fijo': True,
-                        'id_turno_fijo': turno['id']
-                    }
+                    if tiene_ausencia:
+                        # Mantener disponible pero indicar que es turno fijo con ausencia
+                        cancha['turno_fijo_ausente'] = {
+                            'nombre': turno['nombre_cliente'],
+                            'telefono': turno.get('telefono_cliente', ''),
+                            'id_turno_fijo': turno['id']
+                        }
+                    else:
+                        # Ocupada por turno fijo normal
+                        cancha['disponible'] = False
+                        cancha['reserva'] = {
+                            'nombre': turno['nombre_cliente'],
+                            'telefono': turno.get('telefono_cliente', ''),
+                            'es_fijo': True,
+                            'id_turno_fijo': turno['id']
+                        }
                     break
     
     return canchas
@@ -184,6 +212,7 @@ def reservar_turno():
         horario = data['horario']
         cancha_id = data['cancha_id']
         nombre_cliente = data.get('nombre_cliente', 'Sin nombre')
+        telefono_cliente = data.get('telefono_cliente', '')
         es_fijo = data.get('es_fijo', False)
         
         if es_fijo:
@@ -214,6 +243,7 @@ def reservar_turno():
                 'horario': horario,
                 'cancha_id': cancha_id,
                 'nombre_cliente': nombre_cliente,
+                'telefono_cliente': telefono_cliente,
                 'fecha_creacion': datetime.now().isoformat()
             }
             
@@ -243,6 +273,7 @@ def reservar_turno():
             # Crear reserva
             reservas[clave_fecha_hora][cancha_id] = {
                 'nombre': nombre_cliente,
+                'telefono': telefono_cliente,
                 'fecha_reserva': datetime.now().isoformat()
             }
             
@@ -317,6 +348,69 @@ def obtener_turnos_fijos():
         return jsonify({
             'success': True,
             'turnos_fijos': turnos_fijos
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/marcar_ausencia', methods=['POST'])
+def marcar_ausencia():
+    """API para marcar una ausencia en un turno fijo"""
+    try:
+        data = request.get_json()
+        fecha = data['fecha']
+        horario = data['horario']
+        cancha_id = data['cancha_id']
+        id_turno_fijo = data['id_turno_fijo']
+        
+        ausencias = cargar_ausencias()
+        clave_ausencia = f"{fecha}_{horario}_{cancha_id}"
+        
+        # Verificar si ya existe
+        if any(a['clave'] == clave_ausencia for a in ausencias):
+            return jsonify({
+                'success': False,
+                'message': 'Ya existe una ausencia marcada para este turno'
+            }), 400
+        
+        # Crear ausencia
+        ausencia = {
+            'clave': clave_ausencia,
+            'fecha': fecha,
+            'horario': horario,
+            'cancha_id': cancha_id,
+            'id_turno_fijo': id_turno_fijo,
+            'fecha_marcado': datetime.now().isoformat()
+        }
+        
+        ausencias.append(ausencia)
+        guardar_ausencias(ausencias)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Ausencia marcada correctamente. La cancha estará disponible para este día.'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/cancelar_ausencia', methods=['POST'])
+def cancelar_ausencia():
+    """API para cancelar una ausencia y restaurar el turno fijo"""
+    try:
+        data = request.get_json()
+        fecha = data['fecha']
+        horario = data['horario']
+        cancha_id = data['cancha_id']
+        
+        ausencias = cargar_ausencias()
+        clave_ausencia = f"{fecha}_{horario}_{cancha_id}"
+        
+        # Filtrar la ausencia
+        ausencias = [a for a in ausencias if a['clave'] != clave_ausencia]
+        guardar_ausencias(ausencias)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Ausencia cancelada. El turno fijo se restauró.'
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
