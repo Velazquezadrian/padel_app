@@ -45,29 +45,15 @@ copy config.example.json config.json
 
 ## 🎮 Uso
 
-### Opción 1: Aplicación de Escritorio (Recomendado)
+### Iniciar la aplicación
+
+Simplemente ejecuta:
 
 ```bash
-INICIAR_ESCRITORIO.bat
+INICIAR.bat
 ```
 
-Abre una ventana independiente sin necesidad de navegador.
-
-### Opción 2: Versión Navegador
-
-```bash
-INICIAR_APP.bat
-```
-
-Abre la aplicación en tu navegador predeterminado en `http://localhost:5000`
-
-### Opción 3: Modo minimizado
-
-```bash
-INICIAR_SIN_CMD.bat
-```
-
-Inicia la app de escritorio con la ventana CMD minimizada.
+Esto abrirá la aplicación de escritorio en una ventana independiente, sin necesidad de navegador y sin ventanas de CMD visibles.
 
 ## ⚙️ Configuración
 
@@ -113,9 +99,7 @@ Reemplaza `static/images/Padel.jpg` con tu propia imagen de cancha.
 padel-turnos/
 ├── app.py                      # Servidor Flask
 ├── app_escritorio.py           # Launcher app escritorio
-├── INICIAR_ESCRITORIO.bat      # Iniciar modo escritorio
-├── INICIAR_APP.bat             # Iniciar modo navegador
-├── INICIAR_SIN_CMD.bat         # Iniciar minimizado
+├── INICIAR.bat                 # Iniciar aplicación
 ├── requirements.txt            # Dependencias
 ├── config.example.json         # Ejemplo configuración
 ├── static/

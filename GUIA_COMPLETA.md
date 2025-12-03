@@ -1,36 +1,20 @@
 # 🎾 SISTEMA DE TURNOS DE PÁDEL
 
-## ✨ VERSIÓN DE ESCRITORIO DISPONIBLE
+## ✨ APLICACIÓN DE ESCRITORIO
 
-Ahora tenés **2 formas de usar la aplicación:**
-
-### 🖥️ OPCIÓN 1: Aplicación de Escritorio (RECOMENDADO)
-**Ventana independiente, NO requiere navegador**
+**Ventana independiente, sin ventanas de CMD**
 
 ```
-Doble clic en: INICIAR_ESCRITORIO.bat
+Doble clic en: INICIAR.bat
 ```
 
 **Ventajas:**
 - ✅ Aplicación nativa de Windows
 - ✅ No abre navegador
-- ✅ Ventana propia con icono
+- ✅ Sin ventanas de consola visibles
 - ✅ Más rápida y fluida
 - ✅ Se ve como programa profesional
-
----
-
-### 🌐 OPCIÓN 2: Versión Navegador (Clásica)
-**Se abre en tu navegador predeterminado**
-
-```
-Doble clic en: INICIAR_APP.bat
-```
-
-**Ventajas:**
-- ✅ Familiar (usas tu navegador)
-- ✅ Accesible desde otras PCs en red
-- ✅ Más ligera en recursos
+- ✅ El servidor se cierra automáticamente al cerrar la app
 
 ---
 
@@ -41,9 +25,7 @@ Doble clic en: INICIAR_APP.bat
 1. **Verifica Python instalado** (https://www.python.org/downloads/)
    - ⚠️ Marca ✅ "Add Python to PATH" al instalar
 
-2. **Ejecuta:**
-   - Para app escritorio: `INICIAR_ESCRITORIO.bat`
-   - Para navegador: `INICIAR_APP.bat`
+2. **Ejecuta:** `INICIAR.bat`
 
 3. La primera vez instalará todo automáticamente (1-2 minutos)
 
@@ -96,14 +78,9 @@ Para cambiarla: reemplaza ese archivo con otra imagen.
 ## 📁 ARCHIVOS PRINCIPALES
 
 ```
-INICIAR_ESCRITORIO.bat  ← APP DE ESCRITORIO (nuevo!)
-INICIAR_APP.bat         ← Versión navegador
-CREAR_ACCESO_DIRECTO.bat ← Crea icono en escritorio
-
+INICIAR.bat             ← Iniciar la aplicación
 app_escritorio.py       ← Motor de la app escritorio
-iniciar_app.py          ← Motor navegador
 app.py                  ← Servidor Flask
-
 config.json             ← Tu configuración (se crea solo)
 reservas.json           ← Tus reservas (se crea solo)
 ```
@@ -132,8 +109,7 @@ reservas.json           ← Tus reservas (se crea solo)
 
 ### "No se abre la ventana de escritorio"
 👉 Elimina carpeta `venv`
-👉 Ejecuta `INICIAR_ESCRITORIO.bat` de nuevo
-👉 O usa `INICIAR_APP.bat` (navegador)
+👉 Ejecuta `INICIAR.bat` de nuevo
 
 ### "Error al instalar dependencias"
 👉 Abre PowerShell como Administrador
@@ -156,23 +132,18 @@ reservas.json           ← Tus reservas (se crea solo)
 
 ## 🌐 USAR EN RED LOCAL
 
-**Servidor en una PC, acceso desde otras:**
-
-1. En PC principal, usa: `INICIAR_APP.bat` (no escritorio)
-2. Abre PowerShell: `ipconfig`
-3. Busca tu IP (ej: 192.168.1.100)
-4. En otras PCs: `http://192.168.1.100:5000`
+Para acceder desde otras PCs, necesitarás modificar `app.py` para que escuche en todas las interfaces de red (cambia `host='127.0.0.1'` por `host='0.0.0.0'`).
 
 ---
 
-## 🆕 NOVEDADES DE ESTA VERSIÓN
+## 🆕 CARACTERÍSTICAS PRINCIPALES
 
-✅ **Aplicación de escritorio nativa**
+✅ **Aplicación de escritorio nativa** sin ventanas de CMD
 ✅ **Sistema de semáforo** en horarios (🟢🟡🔴)
 ✅ **Jugadores animados** en imagen de cancha
 ✅ **Tu propia imagen** de cancha personalizada
 ✅ **Instalación automática** en 1 clic
-✅ **Sin dependencias complejas**
+✅ **Cierre automático** del servidor al cerrar la app
 
 ---
 
