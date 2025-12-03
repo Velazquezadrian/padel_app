@@ -11,6 +11,7 @@
         <header>
             <h1>🎾 Sistema de Reserva de Turnos - Pádel</h1>
             <nav>
+                <button onclick="abrirModalTurnosFijos()" class="btn-secondary">📋 Turnos Fijos</button>
                 <a href="/configuracion" class="btn-secondary">⚙️ Configuración</a>
             </nav>
         </header>
@@ -57,6 +58,13 @@
                     <label for="nombreCliente">Nombre del Cliente:</label>
                     <input type="text" id="nombreCliente" name="nombreCliente" required>
                 </div>
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="esFijo" name="esFijo">
+                        <span>🔁 Turno Fijo (se repite todas las semanas el mismo día y horario)</span>
+                    </label>
+                    <p class="helper-text" id="diaSemanaMensaje" style="display:none; margin-top: 10px; color: #666; font-size: 14px;"></p>
+                </div>
                 <div class="reserva-info">
                     <p><strong>Fecha:</strong> <span id="infoFecha"></span></p>
                     <p><strong>Horario:</strong> <span id="infoHorario"></span></p>
@@ -67,6 +75,17 @@
                     <button type="button" class="btn-secondary" onclick="cerrarModal()">❌ Cancelar</button>
                 </div>
             </form>
+        </div>
+    </div>
+    
+    <!-- Modal para gestionar turnos fijos -->
+    <div id="modalTurnosFijos" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalTurnosFijos()">&times;</span>
+            <h2>📋 Gestionar Turnos Fijos</h2>
+            <div id="listaTurnosFijos">
+                <!-- Se carga dinámicamente -->
+            </div>
         </div>
     </div>
 

@@ -9,6 +9,7 @@ app.secret_key = 'tu_clave_secreta_aqui_cambiar_en_produccion'
 # Archivo para guardar configuración
 CONFIG_FILE = 'config.json'
 RESERVAS_FILE = 'reservas.json'
+TURNOS_FIJOS_FILE = 'turnos_fijos.json'
 
 def cargar_config():
     """Carga la configuración del sistema"""
@@ -39,6 +40,39 @@ def guardar_reservas(reservas):
     """Guarda las reservas"""
     with open(RESERVAS_FILE, 'w', encoding='utf-8') as f:
         json.dump(reservas, f, indent=4)
+
+def cargar_turnos_fijos():
+    """Carga los turnos fijos/recurrentes"""
+    if os.path.exists(TURNOS_FIJOS_FILE):
+        with open(TURNOS_FIJOS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return []
+
+def guardar_turnos_fijos(turnos_fijos):
+    """Guarda los turnos fijos"""
+    with open(TURNOS_FIJOS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(turnos_fijos, f, indent=4)
+
+def aplicar_turnos_fijos(fecha, horario, canchas):
+    """Aplica turnos fijos a la disponibilidad de canchas"""
+    turnos_fijos = cargar_turnos_fijos()
+    fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+    dia_semana = fecha_obj.weekday()  # 0=Lunes, 6=Domingo
+    
+    for turno in turnos_fijos:
+        if turno['dia_semana'] == dia_semana and turno['horario'] == horario:
+            # Buscar la cancha y marcarla como ocupada por el turno fijo
+            for cancha in canchas:
+                if cancha['id'] == turno['cancha_id']:
+                    cancha['disponible'] = False
+                    cancha['reserva'] = {
+                        'nombre': turno['nombre_cliente'],
+                        'es_fijo': True,
+                        'id_turno_fijo': turno['id']
+                    }
+                    break
+    
+    return canchas
 
 def generar_horarios(hora_inicio, hora_fin, duracion):
     """Genera lista de horarios disponibles"""
@@ -121,6 +155,9 @@ def obtener_disponibilidad():
                 'reserva': reservas_horario.get(cancha_id, {})
             })
         
+        # Aplicar turnos fijos
+        canchas = aplicar_turnos_fijos(fecha, horario, canchas)
+        
         print(f"[DEBUG] Canchas generadas: {canchas}")
         
         response = {
@@ -147,33 +184,74 @@ def reservar_turno():
         horario = data['horario']
         cancha_id = data['cancha_id']
         nombre_cliente = data.get('nombre_cliente', 'Sin nombre')
+        es_fijo = data.get('es_fijo', False)
         
-        reservas = cargar_reservas()
-        clave_fecha_hora = f"{fecha}_{horario}"
-        
-        # Inicializar si no existe
-        if clave_fecha_hora not in reservas:
-            reservas[clave_fecha_hora] = {}
-        
-        # Verificar si ya está reservada
-        if cancha_id in reservas[clave_fecha_hora]:
+        if es_fijo:
+            # Crear turno fijo recurrente
+            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+            dia_semana = fecha_obj.weekday()
+            
+            turnos_fijos = cargar_turnos_fijos()
+            
+            # Generar ID único
+            nuevo_id = max([t.get('id', 0) for t in turnos_fijos], default=0) + 1
+            
+            # Verificar si ya existe un turno fijo para ese día/horario/cancha
+            for turno in turnos_fijos:
+                if (turno['dia_semana'] == dia_semana and 
+                    turno['horario'] == horario and 
+                    turno['cancha_id'] == cancha_id):
+                    return jsonify({
+                        'success': False,
+                        'message': 'Ya existe un turno fijo para este día y horario en esta cancha'
+                    }), 400
+            
+            # Crear turno fijo
+            turno_fijo = {
+                'id': nuevo_id,
+                'dia_semana': dia_semana,
+                'dia_nombre': ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'][dia_semana],
+                'horario': horario,
+                'cancha_id': cancha_id,
+                'nombre_cliente': nombre_cliente,
+                'fecha_creacion': datetime.now().isoformat()
+            }
+            
+            turnos_fijos.append(turno_fijo)
+            guardar_turnos_fijos(turnos_fijos)
+            
             return jsonify({
-                'success': False, 
-                'message': 'Esta cancha ya está reservada para este horario'
-            }), 400
-        
-        # Crear reserva
-        reservas[clave_fecha_hora][cancha_id] = {
-            'nombre': nombre_cliente,
-            'fecha_reserva': datetime.now().isoformat()
-        }
-        
-        guardar_reservas(reservas)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Reserva realizada correctamente'
-        })
+                'success': True,
+                'message': f'Turno fijo creado para todos los {turno_fijo["dia_nombre"]}'
+            })
+        else:
+            # Reserva normal (no recurrente)
+            reservas = cargar_reservas()
+            clave_fecha_hora = f"{fecha}_{horario}"
+            
+            # Inicializar si no existe
+            if clave_fecha_hora not in reservas:
+                reservas[clave_fecha_hora] = {}
+            
+            # Verificar si ya está reservada
+            if cancha_id in reservas[clave_fecha_hora]:
+                return jsonify({
+                    'success': False, 
+                    'message': 'Esta cancha ya está reservada para este horario'
+                }), 400
+            
+            # Crear reserva
+            reservas[clave_fecha_hora][cancha_id] = {
+                'nombre': nombre_cliente,
+                'fecha_reserva': datetime.now().isoformat()
+            }
+            
+            guardar_reservas(reservas)
+            
+            return jsonify({
+                'success': True,
+                'message': 'Reserva realizada correctamente'
+            })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
@@ -185,28 +263,53 @@ def cancelar_reserva():
         fecha = data.get('fecha', datetime.now().strftime('%Y-%m-%d'))
         horario = data['horario']
         cancha_id = data['cancha_id']
+        id_turno_fijo = data.get('id_turno_fijo')
         
-        reservas = cargar_reservas()
-        clave_fecha_hora = f"{fecha}_{horario}"
-        
-        if clave_fecha_hora in reservas and cancha_id in reservas[clave_fecha_hora]:
-            del reservas[clave_fecha_hora][cancha_id]
-            
-            # Limpiar si no hay más reservas en ese horario
-            if not reservas[clave_fecha_hora]:
-                del reservas[clave_fecha_hora]
-            
-            guardar_reservas(reservas)
+        # Si es un turno fijo, eliminarlo
+        if id_turno_fijo:
+            turnos_fijos = cargar_turnos_fijos()
+            turnos_fijos = [t for t in turnos_fijos if t['id'] != id_turno_fijo]
+            guardar_turnos_fijos(turnos_fijos)
             
             return jsonify({
                 'success': True,
-                'message': 'Reserva cancelada correctamente'
+                'message': 'Turno fijo eliminado correctamente'
             })
         else:
-            return jsonify({
-                'success': False,
-                'message': 'No se encontró la reserva'
-            }), 404
+            # Cancelar reserva normal
+            reservas = cargar_reservas()
+            clave_fecha_hora = f"{fecha}_{horario}"
+            
+            if clave_fecha_hora in reservas and cancha_id in reservas[clave_fecha_hora]:
+                del reservas[clave_fecha_hora][cancha_id]
+                
+                # Limpiar si no hay más reservas en ese horario
+                if not reservas[clave_fecha_hora]:
+                    del reservas[clave_fecha_hora]
+                
+                guardar_reservas(reservas)
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Reserva cancelada correctamente'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': 'No se encontró la reserva'
+                }), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/obtener_turnos_fijos', methods=['GET'])
+def obtener_turnos_fijos():
+    """API para obtener todos los turnos fijos"""
+    try:
+        turnos_fijos = cargar_turnos_fijos()
+        return jsonify({
+            'success': True,
+            'turnos_fijos': turnos_fijos
+        })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 

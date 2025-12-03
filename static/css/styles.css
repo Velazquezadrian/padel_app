@@ -534,6 +534,85 @@ nav {
     border: 2px solid var(--accent-color);
 }
 
+/* Estilos para Turnos Fijos */
+.checkbox-group {
+    margin: 20px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.helper-text {
+    background-color: #e8f5e9;
+    border-left: 4px solid var(--success-color);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.turno-fijo-badge {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.turnos-fijos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.turno-fijo-item {
+    background-color: #f8f9fa;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.turno-fijo-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow);
+}
+
+.turno-fijo-info h4 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.turno-fijo-info p {
+    margin: 5px 0;
+    color: var(--text-color);
+    font-size: 14px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     header {
@@ -556,5 +635,14 @@ nav {
     .modal-content {
         margin: 20% auto;
         padding: 25px;
+    }
+    
+    .turno-fijo-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .turno-fijo-item button {
+        width: 100%;
     }
 }
