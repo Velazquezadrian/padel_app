@@ -184,6 +184,49 @@ nav {
     background-color: #c0392b;
 }
 
+/* Botones de Backup */
+.backup-buttons {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+
+.btn-backup-discrete {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--primary-color);
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    font-weight: 600;
+    min-width: 120px;
+}
+
+.btn-backup-discrete:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.backup-icon {
+    font-size: 1.2em;
+}
+
+.backup-text {
+    font-size: 0.95em;
+}
+
 /* Selector de Fecha */
 .fecha-selector {
     background-color: var(--card-bg);

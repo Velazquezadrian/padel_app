@@ -841,3 +841,94 @@ async function guardarProductos() {
         alert('Error: ' + error.message);
     }
 }
+
+// ====================================
+// FUNCIONES BACKUP/RESTAURACIÓN
+// ====================================
+
+async function exportarBackup() {
+    try {
+        const response = await fetch('/api/exportar_backup');
+        const data = await response.json();
+        
+        if (data.success) {
+            const archivos = data.archivos.join('\n  • ');
+            alert(`✅ Backup guardado exitosamente en:\n${data.ruta}\n\nArchivos creados:\n  • ${archivos}\n\n📄 El archivo _LEGIBLE.txt puede abrirse con el Bloc de notas\n📦 El archivo .json se usa para importar`);
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error al exportar: ' + error.message);
+    }
+}
+
+function abrirModalImportarBackup() {
+    document.getElementById('modalImportarBackup').style.display = 'block';
+    document.getElementById('formImportarBackup').reset();
+    document.getElementById('mensajeImportarBackup').style.display = 'none';
+}
+
+function cerrarModalImportarBackup() {
+    document.getElementById('modalImportarBackup').style.display = 'none';
+}
+
+document.getElementById('formImportarBackup').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const archivoInput = document.getElementById('archivoBackup');
+    const archivo = archivoInput.files[0];
+    
+    if (!archivo) {
+        alert('Por favor selecciona un archivo');
+        return;
+    }
+    
+    if (!confirm('⚠️ ADVERTENCIA: Esta acción reemplazará todos los datos actuales. ¿Continuar?')) {
+        return;
+    }
+    
+    const mensajeDiv = document.getElementById('mensajeImportarBackup');
+    mensajeDiv.style.display = 'block';
+    mensajeDiv.style.backgroundColor = '#d1ecf1';
+    mensajeDiv.style.color = '#0c5460';
+    mensajeDiv.style.border = '2px solid #bee5eb';
+    mensajeDiv.textContent = '⏳ Importando datos...';
+    
+    try {
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+        
+        const response = await fetch('/api/importar_backup', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            mensajeDiv.style.backgroundColor = '#d4edda';
+            mensajeDiv.style.color = '#155724';
+            mensajeDiv.style.border = '2px solid #c3e6cb';
+            mensajeDiv.innerHTML = `
+                ✅ <strong>Datos importados correctamente</strong><br>
+                📊 Reservas: ${data.estadisticas.reservas}<br>
+                📋 Turnos Fijos: ${data.estadisticas.turnos_fijos}<br>
+                🔵 Ausencias: ${data.estadisticas.ausencias}
+            `;
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            mensajeDiv.style.backgroundColor = '#f8d7da';
+            mensajeDiv.style.color = '#721c24';
+            mensajeDiv.style.border = '2px solid #f5c6cb';
+            mensajeDiv.textContent = '❌ Error: ' + data.message;
+        }
+    } catch (error) {
+        mensajeDiv.style.backgroundColor = '#f8d7da';
+        mensajeDiv.style.color = '#721c24';
+        mensajeDiv.style.border = '2px solid #f5c6cb';
+        mensajeDiv.textContent = '❌ Error: ' + error.message;
+    }
+});

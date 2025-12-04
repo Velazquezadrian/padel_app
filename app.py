@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_file
 from datetime import datetime, timedelta
 import json
 import os
 import sys
+from io import BytesIO
 
 # Detectar si estamos ejecutando desde PyInstaller
 if getattr(sys, 'frozen', False):
@@ -638,6 +639,255 @@ def api_reporte_finanzas():
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/exportar_backup', methods=['GET'])
+def exportar_backup():
+    """Exporta todos los datos a un archivo JSON legible"""
+    try:
+        config = cargar_config()
+        reservas = cargar_reservas()
+        turnos_fijos = cargar_turnos_fijos()
+        ausencias = cargar_ausencias()
+        
+        datos_completos = {
+            "_INFORMACION": {
+                "descripcion": "Backup completo - Sistema de Turnos Pádel",
+                "fecha_exportacion": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "version": "1.0",
+                "nota": "Este archivo puede editarse con cualquier editor de texto y luego importarse"
+            },
+            "configuracion": {
+                "cantidad_canchas": config.get('cantidad_canchas', 2),
+                "horario_inicio": config.get('horario_inicio', '08:00'),
+                "horario_fin": config.get('horario_fin', '22:00'),
+                "duracion_turno_minutos": config.get('duracion_turno', 90),
+                "precio_turno_regular": config.get('precio_turno_regular', 10000),
+                "precio_turno_fijo": config.get('precio_turno_fijo', 9000),
+                "descuento_promocion_porcentaje": config.get('descuento_promocion', 0)
+            },
+            "reservas": reservas,
+            "turnos_fijos": turnos_fijos,
+            "ausencias": ausencias,
+            "estadisticas": {
+                "total_reservas": len(reservas),
+                "total_turnos_fijos": len(turnos_fijos) if isinstance(turnos_fijos, list) else len(turnos_fijos.keys()),
+                "total_ausencias": sum(len(fechas) if isinstance(fechas, list) else 0 for fechas in ausencias.values()) if isinstance(ausencias, dict) else 0
+            }
+        }
+        
+        json_str = json.dumps(datos_completos, ensure_ascii=False, indent=2)
+        
+        # Guardar en la carpeta de Descargas del usuario
+        downloads_path = os.path.join(os.path.expanduser('~'), 'Downloads')
+        fecha_actual = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Guardar JSON (para importar)
+        filename_json = f'PadelApp_Backup_{fecha_actual}.json'
+        filepath_json = os.path.join(downloads_path, filename_json)
+        with open(filepath_json, 'w', encoding='utf-8') as f:
+            f.write(json_str)
+        
+        # Crear versión legible en texto plano
+        filename_txt = f'PadelApp_Backup_{fecha_actual}_LEGIBLE.txt'
+        filepath_txt = os.path.join(downloads_path, filename_txt)
+        
+        texto_legible = []
+        texto_legible.append("═" * 80)
+        texto_legible.append("           BACKUP - SISTEMA DE TURNOS DE PÁDEL")
+        texto_legible.append("═" * 80)
+        texto_legible.append(f"\nFecha de exportación: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+        texto_legible.append("\nEste archivo es solo para lectura. Para importar, use el archivo .json\n")
+        
+        # CONFIGURACIÓN
+        texto_legible.append("\n" + "─" * 80)
+        texto_legible.append("⚙️  CONFIGURACIÓN DEL SISTEMA")
+        texto_legible.append("─" * 80)
+        texto_legible.append(f"  • Cantidad de canchas: {config.get('cantidad_canchas', 2)}")
+        texto_legible.append(f"  • Horario: {config.get('horario_inicio', '08:00')} a {config.get('horario_fin', '22:00')}")
+        texto_legible.append(f"  • Duración por turno: {config.get('duracion_turno', 90)} minutos")
+        texto_legible.append(f"  • Precio turno regular: ${config.get('precio_turno_regular', 10000):,.0f}")
+        texto_legible.append(f"  • Precio turno fijo: ${config.get('precio_turno_fijo', 9000):,.0f}")
+        texto_legible.append(f"  • Descuento promoción: {config.get('descuento_promocion', 0)}%")
+        
+        # RESERVAS
+        texto_legible.append("\n" + "─" * 80)
+        texto_legible.append("📅 RESERVAS REGISTRADAS")
+        texto_legible.append("─" * 80)
+        
+        if reservas:
+            reservas_ordenadas = sorted(reservas.items())
+            for fecha_hora, canchas in reservas_ordenadas:
+                fecha, hora = fecha_hora.split('_')
+                fecha_formateada = datetime.strptime(fecha, '%Y-%m-%d').strftime('%d/%m/%Y')
+                
+                for cancha_id, reserva in canchas.items():
+                    texto_legible.append(f"\n  📍 {fecha_formateada} - {hora} - {cancha_id}")
+                    texto_legible.append(f"     Cliente: {reserva.get('nombre', 'N/A')}")
+                    if reserva.get('telefono'):
+                        texto_legible.append(f"     Teléfono: {reserva.get('telefono')}")
+                    texto_legible.append(f"     Tipo: {'Turno Fijo' if reserva.get('es_fijo') else 'Turno Regular'}")
+                    texto_legible.append(f"     Precio final: ${reserva.get('precio_final', 0):,.0f}")
+                    if reserva.get('descuento_aplicado', 0) > 0:
+                        texto_legible.append(f"     Descuento aplicado: ${reserva.get('descuento_aplicado', 0):,.0f}")
+                    if reserva.get('productos_extras'):
+                        texto_legible.append(f"     Productos extras: {reserva.get('productos_extras')}")
+                        texto_legible.append(f"     Precio extras: ${reserva.get('precio_extras', 0):,.0f}")
+        else:
+            texto_legible.append("\n  (No hay reservas registradas)")
+        
+        # TURNOS FIJOS
+        texto_legible.append("\n" + "─" * 80)
+        texto_legible.append("🔁 TURNOS FIJOS (RECURRENTES)")
+        texto_legible.append("─" * 80)
+        
+        if turnos_fijos and len(turnos_fijos) > 0:
+            for turno in turnos_fijos if isinstance(turnos_fijos, list) else turnos_fijos.values():
+                estado = "✅ Activo" if turno.get('activo', True) else "❌ Inactivo"
+                texto_legible.append(f"\n  🔄 {turno.get('dia_semana', 'N/A')} - {turno.get('hora', 'N/A')} - {turno.get('cancha', 'N/A')}")
+                texto_legible.append(f"     Cliente: {turno.get('nombre', 'N/A')}")
+                if turno.get('telefono'):
+                    texto_legible.append(f"     Teléfono: {turno.get('telefono')}")
+                texto_legible.append(f"     Desde: {turno.get('fecha_inicio', 'N/A')}")
+                texto_legible.append(f"     Estado: {estado}")
+        else:
+            texto_legible.append("\n  (No hay turnos fijos registrados)")
+        
+        # AUSENCIAS
+        texto_legible.append("\n" + "─" * 80)
+        texto_legible.append("🔵 AUSENCIAS DE TURNOS FIJOS")
+        texto_legible.append("─" * 80)
+        
+        if ausencias and isinstance(ausencias, dict) and len(ausencias) > 0:
+            total_ausencias = 0
+            for turno_id, fechas in ausencias.items():
+                if isinstance(fechas, list) and len(fechas) > 0:
+                    # Buscar info del turno
+                    turno_info = "ID: " + turno_id
+                    if isinstance(turnos_fijos, list):
+                        for turno in turnos_fijos:
+                            if str(turno.get('id', '')) == turno_id:
+                                turno_info = f"{turno.get('nombre', 'N/A')} - {turno.get('dia_semana', 'N/A')} {turno.get('hora', 'N/A')}"
+                                break
+                    
+                    texto_legible.append(f"\n  👤 {turno_info}")
+                    fechas_ordenadas = sorted(fechas)
+                    for fecha in fechas_ordenadas:
+                        fecha_formateada = datetime.strptime(fecha, '%Y-%m-%d').strftime('%d/%m/%Y')
+                        texto_legible.append(f"     • {fecha_formateada}")
+                        total_ausencias += 1
+            
+            if total_ausencias == 0:
+                texto_legible.append("\n  (No hay ausencias registradas)")
+        else:
+            texto_legible.append("\n  (No hay ausencias registradas)")
+        
+        # ESTADÍSTICAS
+        texto_legible.append("\n" + "─" * 80)
+        texto_legible.append("📊 ESTADÍSTICAS")
+        texto_legible.append("─" * 80)
+        texto_legible.append(f"  • Total de reservas: {len(reservas)}")
+        texto_legible.append(f"  • Total de turnos fijos: {len(turnos_fijos) if isinstance(turnos_fijos, list) else len(turnos_fijos.keys())}")
+        total_aus = sum(len(fechas) if isinstance(fechas, list) else 0 for fechas in ausencias.values()) if isinstance(ausencias, dict) else 0
+        texto_legible.append(f"  • Total de ausencias: {total_aus}")
+        
+        texto_legible.append("\n" + "═" * 80)
+        texto_legible.append("Fin del backup")
+        texto_legible.append("═" * 80)
+        
+        with open(filepath_txt, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(texto_legible))
+        
+        return jsonify({
+            'success': True,
+            'message': f'Backup guardado exitosamente',
+            'archivos': [filename_json, filename_txt],
+            'ruta': downloads_path
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error al exportar: {str(e)}'}), 400
+
+@app.route('/api/descargar_backup/<filename>')
+def descargar_backup(filename):
+    """Descarga el archivo de backup ya generado"""
+    try:
+        downloads_path = os.path.join(os.path.expanduser('~'), 'Downloads')
+        filepath = os.path.join(downloads_path, filename)
+        
+        if not os.path.exists(filepath):
+            return jsonify({'success': False, 'message': 'Archivo no encontrado'}), 404
+        
+        with open(filepath, 'r', encoding='utf-8') as f:
+            json_str = f.read()
+        
+        output = BytesIO(json_str.encode('utf-8'))
+        output.seek(0)
+        
+        return send_file(
+            output,
+            mimetype='application/json',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error al exportar: {str(e)}'}), 400
+
+@app.route('/api/importar_backup', methods=['POST'])
+def importar_backup():
+    """Importa datos desde un archivo JSON de backup"""
+    try:
+        if 'archivo' not in request.files:
+            return jsonify({'success': False, 'message': 'No se recibió ningún archivo'}), 400
+        
+        archivo = request.files['archivo']
+        
+        if archivo.filename == '':
+            return jsonify({'success': False, 'message': 'No se seleccionó ningún archivo'}), 400
+        
+        if not archivo.filename.endswith('.json'):
+            return jsonify({'success': False, 'message': 'El archivo debe ser .json'}), 400
+        
+        contenido = archivo.read().decode('utf-8')
+        datos = json.loads(contenido)
+        
+        if 'configuracion' not in datos or 'reservas' not in datos:
+            return jsonify({'success': False, 'message': 'Formato de archivo inválido'}), 400
+        
+        config_data = datos['configuracion']
+        config_dict = {
+            'cantidad_canchas': config_data.get('cantidad_canchas', 2),
+            'horario_inicio': config_data.get('horario_inicio', '08:00'),
+            'horario_fin': config_data.get('horario_fin', '22:00'),
+            'duracion_turno': config_data.get('duracion_turno_minutos', 90),
+            'precio_turno_regular': config_data.get('precio_turno_regular', 10000),
+            'precio_turno_fijo': config_data.get('precio_turno_fijo', 9000),
+            'descuento_promocion': config_data.get('descuento_promocion_porcentaje', 0)
+        }
+        
+        reservas_dict = datos.get('reservas', {})
+        turnos_fijos_data = datos.get('turnos_fijos', [])
+        ausencias_dict = datos.get('ausencias', {})
+        
+        guardar_config(config_dict)
+        guardar_reservas(reservas_dict)
+        guardar_turnos_fijos(turnos_fijos_data)
+        guardar_ausencias(ausencias_dict)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Datos importados correctamente',
+            'estadisticas': {
+                'reservas': len(reservas_dict),
+                'turnos_fijos': len(turnos_fijos_data) if isinstance(turnos_fijos_data, list) else len(turnos_fijos_data.keys()),
+                'ausencias': sum(len(fechas) if isinstance(fechas, list) else 0 for fechas in ausencias_dict.values()) if isinstance(ausencias_dict, dict) else 0
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return jsonify({'success': False, 'message': 'El archivo JSON no es válido'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error al importar: {str(e)}'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

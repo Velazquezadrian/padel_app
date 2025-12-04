@@ -239,6 +239,43 @@
         </div>
     </div>
 
+    <!-- Modal Importar Backup -->
+    <div id="modalImportarBackup" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="margin-bottom: 20px;">📤 Importar Backup</h2>
+
+            <div style="background-color: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <strong>⚠️ ADVERTENCIA:</strong> Esta acción reemplazará todos los datos actuales.
+            </div>
+
+            <form id="formImportarBackup" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="archivoBackup">Seleccionar archivo JSON:</label>
+                    <input type="file" id="archivoBackup" name="archivo" accept=".json" required style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+                </div>
+
+                <div id="mensajeImportarBackup" style="display: none; padding: 10px; border-radius: 8px; margin-top: 15px;"></div>
+
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary">✅ Confirmar Importación</button>
+                    <button type="button" class="btn-secondary" onclick="cerrarModalImportarBackup()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Botones discretos de backup -->
+    <div class="backup-buttons">
+        <button onclick="exportarBackup()" class="btn-backup-discrete" title="Exportar turnos a archivo JSON">
+            <span class="backup-icon">💾</span>
+            <span class="backup-text">Exportar</span>
+        </button>
+        <button onclick="abrirModalImportarBackup()" class="btn-backup-discrete" title="Importar turnos desde archivo JSON">
+            <span class="backup-icon">📥</span>
+            <span class="backup-text">Importar</span>
+        </button>
+    </div>
+
     <script>
         // Pasar datos de configuración a JavaScript
         const CONFIG = {
