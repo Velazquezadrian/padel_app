@@ -21,6 +21,72 @@
     --shadow-hover: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
+/* Tema Océano Azul */
+[data-theme="oceano"] {
+    --primary-color: #0077be;
+    --primary-dark: #005a8f;
+    --secondary-color: #1e3a5f;
+    --accent-color: #ff6b6b;
+    --success-color: #20c997;
+    --warning-color: #ffa726;
+    --bg-color: #e8f4f8;
+    --card-bg: #ffffff;
+    --text-color: #1e3a5f;
+    --text-light: #6c757d;
+    --border-color: #b3d9eb;
+    --shadow: 0 2px 10px rgba(0, 119, 190, 0.1);
+    --shadow-hover: 0 5px 20px rgba(0, 119, 190, 0.2);
+}
+
+/* Tema Atardecer Naranja */
+[data-theme="atardecer"] {
+    --primary-color: #ff6f00;
+    --primary-dark: #c43e00;
+    --secondary-color: #5d4037;
+    --accent-color: #d32f2f;
+    --success-color: #66bb6a;
+    --warning-color: #ffb300;
+    --bg-color: #fff3e0;
+    --card-bg: #ffffff;
+    --text-color: #3e2723;
+    --text-light: #8d6e63;
+    --border-color: #ffccbc;
+    --shadow: 0 2px 10px rgba(255, 111, 0, 0.1);
+    --shadow-hover: 0 5px 20px rgba(255, 111, 0, 0.2);
+}
+
+/* Tema Noche Morada */
+[data-theme="noche"] {
+    --primary-color: #7b1fa2;
+    --primary-dark: #4a148c;
+    --secondary-color: #1a1a2e;
+    --accent-color: #e91e63;
+    --success-color: #4caf50;
+    --warning-color: #ffc107;
+    --bg-color: #16213e;
+    --card-bg: #1a1a2e;
+    --text-color: #e0e0e0;
+    --text-light: #b0b0b0;
+    --border-color: #2d2d44;
+    --shadow: 0 2px 10px rgba(123, 31, 162, 0.2);
+    --shadow-hover: 0 5px 20px rgba(123, 31, 162, 0.3);
+}
+
+/* Ajustes especiales para tema oscuro */
+[data-theme="noche"] .horario-btn {
+    background-color: #2d2d44;
+    color: #ffffff;
+}
+
+[data-theme="noche"] .horario-btn:hover {
+    background-color: #3a3a52;
+}
+
+[data-theme="noche"] .horario-time {
+    color: #ffffff;
+    font-weight: 600;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-color);
@@ -692,5 +758,98 @@ nav {
     
     .turno-fijo-item button {
         width: 100%;
+    }
+}
+
+/* Estilos para el modal de personalización */
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.theme-card {
+    border: 3px solid transparent;
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+}
+
+.theme-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.theme-card.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.2);
+}
+
+.theme-preview {
+    width: 100%;
+    height: 100px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.theme-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.theme-description {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.btn-customize {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-customize:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Animaciones para notificaciones */
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
     }
 }

@@ -11,6 +11,7 @@ CONFIG_FILE = 'config.json'
 RESERVAS_FILE = 'reservas.json'
 TURNOS_FIJOS_FILE = 'turnos_fijos.json'
 AUSENCIAS_FILE = 'ausencias.json'
+TEMA_FILE = 'tema.json'
 
 def cargar_config():
     """Carga la configuración del sistema"""
@@ -65,6 +66,18 @@ def guardar_ausencias(ausencias):
     """Guarda las ausencias"""
     with open(AUSENCIAS_FILE, 'w', encoding='utf-8') as f:
         json.dump(ausencias, f, indent=4)
+
+def cargar_tema():
+    """Carga el tema seleccionado por el usuario"""
+    if os.path.exists(TEMA_FILE):
+        with open(TEMA_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {'tema': 'clasico'}
+
+def guardar_tema(tema):
+    """Guarda el tema seleccionado por el usuario"""
+    with open(TEMA_FILE, 'w', encoding='utf-8') as f:
+        json.dump({'tema': tema}, f, indent=4)
 
 def aplicar_turnos_fijos(fecha, horario, canchas):
     """Aplica turnos fijos a la disponibilidad de canchas"""
@@ -412,6 +425,32 @@ def cancelar_ausencia():
             'success': True,
             'message': 'Ausencia cancelada. El turno fijo se restauró.'
         })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/guardar_tema', methods=['POST'])
+def api_guardar_tema():
+    """Guarda el tema seleccionado por el usuario"""
+    try:
+        data = request.get_json()
+        tema = data.get('tema', 'clasico')
+        
+        # Validar que el tema es válido
+        temas_validos = ['clasico', 'oceano', 'atardecer', 'noche']
+        if tema not in temas_validos:
+            return jsonify({'success': False, 'message': 'Tema no válido'}), 400
+        
+        guardar_tema(tema)
+        return jsonify({'success': True, 'tema': tema})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/obtener_tema', methods=['GET'])
+def api_obtener_tema():
+    """Obtiene el tema actual"""
+    try:
+        tema_data = cargar_tema()
+        return jsonify({'success': True, 'tema': tema_data.get('tema', 'clasico')})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 

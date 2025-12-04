@@ -5,6 +5,9 @@ let fechaSeleccionada = null;
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
+    // Cargar tema guardado
+    cargarTemaGuardado();
+    
     // Configurar fecha actual
     const inputFecha = document.getElementById('fecha');
     const hoy = new Date().toISOString().split('T')[0];
@@ -507,4 +510,108 @@ async function cancelarAusencia(canchaId, numeroCancha, idTurnoFijo) {
     } catch (error) {
         alert('Error: ' + error.message);
     }
+}
+
+// ============================================
+// Funciones de Personalización de Temas
+// ============================================
+
+async function cargarTemaGuardado() {
+    try {
+        const response = await fetch('/api/obtener_tema');
+        const data = await response.json();
+        
+        if (data.success) {
+            aplicarTema(data.tema);
+        }
+    } catch (error) {
+        console.error('Error al cargar tema:', error);
+    }
+}
+
+function aplicarTema(tema) {
+    document.body.setAttribute('data-theme', tema);
+    
+    // Actualizar tarjetas activas en el modal
+    const tarjetas = document.querySelectorAll('.theme-card');
+    tarjetas.forEach(card => {
+        if (card.getAttribute('data-theme') === tema) {
+            card.classList.add('active');
+        } else {
+            card.classList.remove('active');
+        }
+    });
+}
+
+async function cambiarTema(tema) {
+    try {
+        const response = await fetch('/api/guardar_tema', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tema: tema })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            aplicarTema(tema);
+            // Mostrar feedback visual
+            mostrarNotificacion(`✨ Tema "${obtenerNombreTema(tema)}" aplicado`);
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch (error) {
+        alert('Error al cambiar tema: ' + error.message);
+    }
+}
+
+function obtenerNombreTema(tema) {
+    const nombres = {
+        'clasico': 'Clásico Padel',
+        'oceano': 'Océano Azul',
+        'atardecer': 'Atardecer Naranja',
+        'noche': 'Noche Morada'
+    };
+    return nombres[tema] || tema;
+}
+
+function mostrarNotificacion(mensaje) {
+    // Crear notificación temporal
+    const notif = document.createElement('div');
+    notif.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--primary-color);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    notif.textContent = mensaje;
+    document.body.appendChild(notif);
+    
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        notif.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notif.remove(), 300);
+    }, 3000);
+}
+
+function abrirModalPersonalizacion() {
+    const modal = document.getElementById('modalPersonalizacion');
+    modal.style.display = 'block';
+    
+    // Marcar tema actual como activo
+    const temaActual = document.body.getAttribute('data-theme') || 'clasico';
+    aplicarTema(temaActual);
+}
+
+function cerrarModalPersonalizacion() {
+    const modal = document.getElementById('modalPersonalizacion');
+    modal.style.display = 'none';
 }

@@ -11,6 +11,7 @@
         <header>
             <h1>🎾 Sistema de Reserva de Turnos - Pádel</h1>
             <nav>
+                <button onclick="abrirModalPersonalizacion()" class="btn-customize">🎨 Personalizar</button>
                 <button onclick="abrirModalTurnosFijos()" class="btn-secondary">📋 Turnos Fijos</button>
                 <a href="/configuracion" class="btn-secondary">⚙️ Configuración</a>
             </nav>
@@ -89,6 +90,53 @@
             <h2>📋 Gestionar Turnos Fijos</h2>
             <div id="listaTurnosFijos">
                 <!-- Se carga dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Personalización -->
+    <div id="modalPersonalizacion" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalPersonalizacion()">&times;</span>
+            <h2>🎨 Personalizar Apariencia</h2>
+            <p style="margin-bottom: 20px; color: var(--text-light);">Selecciona tu paleta de colores favorita:</p>
+            
+            <div class="theme-options">
+                <div class="theme-card" data-theme="clasico" onclick="cambiarTema('clasico')">
+                    <div class="theme-preview" style="background: linear-gradient(135deg, #00a86b, #008c59);">
+                        🎾
+                    </div>
+                    <div class="theme-name">Clásico Padel</div>
+                    <div class="theme-description">Verde tradicional del pádel</div>
+                </div>
+
+                <div class="theme-card" data-theme="oceano" onclick="cambiarTema('oceano')">
+                    <div class="theme-preview" style="background: linear-gradient(135deg, #0077be, #005a8f);">
+                        🌊
+                    </div>
+                    <div class="theme-name">Océano Azul</div>
+                    <div class="theme-description">Fresco y profesional</div>
+                </div>
+
+                <div class="theme-card" data-theme="atardecer" onclick="cambiarTema('atardecer')">
+                    <div class="theme-preview" style="background: linear-gradient(135deg, #ff6f00, #c43e00);">
+                        🌅
+                    </div>
+                    <div class="theme-name">Atardecer Naranja</div>
+                    <div class="theme-description">Cálido y energético</div>
+                </div>
+
+                <div class="theme-card" data-theme="noche" onclick="cambiarTema('noche')">
+                    <div class="theme-preview" style="background: linear-gradient(135deg, #7b1fa2, #4a148c);">
+                        🌙
+                    </div>
+                    <div class="theme-name">Noche Morada</div>
+                    <div class="theme-description">Elegante y moderno</div>
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 30px;">
+                <button type="button" class="btn-secondary" onclick="cerrarModalPersonalizacion()">Cerrar</button>
             </div>
         </div>
     </div>

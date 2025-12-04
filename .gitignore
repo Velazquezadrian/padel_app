@@ -17,6 +17,7 @@ config.json
 reservas.json
 turnos_fijos.json
 ausencias.json
+tema.json
 
 # Logs
 *.log
