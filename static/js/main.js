@@ -615,3 +615,123 @@ function cerrarModalPersonalizacion() {
     const modal = document.getElementById('modalPersonalizacion');
     modal.style.display = 'none';
 }
+
+// ============================================
+// FUNCIONES DE FINANZAS
+// ============================================
+
+function abrirModalFinanzas() {
+    const modal = document.getElementById('modalFinanzas');
+    const inputFecha = document.getElementById('fechaFinanzas');
+    
+    // Configurar fecha actual
+    const hoy = new Date().toISOString().split('T')[0];
+    inputFecha.value = hoy;
+    
+    modal.style.display = 'block';
+    
+    // Cargar reporte automáticamente
+    cargarReporteFinanzas();
+}
+
+function cerrarModalFinanzas() {
+    const modal = document.getElementById('modalFinanzas');
+    modal.style.display = 'none';
+}
+
+async function cargarReporteFinanzas() {
+    const fecha = document.getElementById('fechaFinanzas').value;
+    
+    if (!fecha) {
+        alert('Por favor selecciona una fecha');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/finanzas/reporte_diario', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fecha })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarReporteFinanzas(data);
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch (error) {
+        alert('Error al cargar reporte: ' + error.message);
+    }
+}
+
+function mostrarReporteFinanzas(data) {
+    const reporteDiv = document.getElementById('reporteFinanzas');
+    reporteDiv.style.display = 'block';
+    
+    // Formatear moneda
+    const formatoPrecio = (monto) => {
+        return '$' + Math.round(monto).toLocaleString('es-AR');
+    };
+    
+    // Resumen
+    document.getElementById('totalRecaudado').textContent = formatoPrecio(data.resumen.total_recaudado);
+    document.getElementById('totalTurnos').textContent = data.resumen.total_turnos;
+    document.getElementById('totalDescuentos').textContent = formatoPrecio(data.resumen.total_descuentos);
+    
+    document.getElementById('turnosRegulares').textContent = data.resumen.turnos_regulares + ' turnos';
+    document.getElementById('turnosFijos').textContent = data.resumen.turnos_fijos + ' turnos';
+    
+    // Promoción activa
+    const promocionDiv = document.getElementById('promocionActiva');
+    if (data.resumen.descuento_promocion_actual > 0) {
+        promocionDiv.style.display = 'block';
+        document.getElementById('textoPromocion').textContent = 
+            `${data.resumen.descuento_promocion_actual}% de descuento en todos los turnos nuevos`;
+    } else {
+        promocionDiv.style.display = 'none';
+    }
+    
+    // Detalle de turnos
+    const detalleDiv = document.getElementById('detalleFinanzas');
+    if (data.detalle.length === 0) {
+        detalleDiv.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 30px;">No hay turnos registrados para esta fecha</p>';
+    } else {
+        let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
+        
+        data.detalle.forEach(turno => {
+            const tipoColor = turno.tipo === 'Turno Fijo' ? 'var(--success-color)' : 'var(--primary-color)';
+            const tipoIcon = turno.tipo === 'Turno Fijo' ? '🔁' : '💵';
+            
+            html += `
+                <div style="background-color: var(--card-bg); border: 2px solid var(--border-color); border-left: 5px solid ${tipoColor}; padding: 15px; border-radius: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: ${tipoColor}; margin-bottom: 5px;">
+                                ${tipoIcon} ${turno.tipo}
+                            </div>
+                            <div style="font-size: 0.9em; color: var(--text-light);">
+                                ⏰ ${turno.horario} | 🎾 Cancha ${turno.cancha} | 👤 ${turno.cliente}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85em; color: var(--text-light); text-decoration: ${turno.descuento > 0 ? 'line-through' : 'none'};">
+                                ${turno.descuento > 0 ? formatoPrecio(turno.precio_base) : ''}
+                            </div>
+                            ${turno.descuento > 0 ? `<div style="font-size: 0.85em; color: var(--warning-color);">-${formatoPrecio(turno.descuento)}</div>` : ''}
+                            <div style="font-size: 1.3em; font-weight: bold; color: var(--success-color);">
+                                ${formatoPrecio(turno.precio_final)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        detalleDiv.innerHTML = html;
+    }
+}

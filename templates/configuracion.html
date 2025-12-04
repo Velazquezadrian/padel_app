@@ -73,6 +73,56 @@
                         <small>Duración de cada turno de juego</small>
                     </div>
 
+                    <h3 style="margin-top: 30px; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+                        💰 Configuración de Precios
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="precio_turno_regular">
+                            <span class="label-icon">💵</span>
+                            Precio Turno Regular
+                        </label>
+                        <input type="number" 
+                               id="precio_turno_regular" 
+                               name="precio_turno_regular" 
+                               min="0" 
+                               step="100"
+                               value="{{ config.get('precio_turno_regular', 10000) }}" 
+                               required>
+                        <small>Precio por turno individual (no fijo)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="precio_turno_fijo">
+                            <span class="label-icon">🔁</span>
+                            Precio Turno Fijo
+                        </label>
+                        <input type="number" 
+                               id="precio_turno_fijo" 
+                               name="precio_turno_fijo" 
+                               min="0" 
+                               step="100"
+                               value="{{ config.get('precio_turno_fijo', 9000) }}" 
+                               required>
+                        <small>Precio por turno fijo/recurrente (puede tener descuento)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descuento_promocion">
+                            <span class="label-icon">🎁</span>
+                            Descuento Promocional (%)
+                        </label>
+                        <input type="number" 
+                               id="descuento_promocion" 
+                               name="descuento_promocion" 
+                               min="0" 
+                               max="100"
+                               step="5"
+                               value="{{ config.get('descuento_promocion', 0) }}" 
+                               required>
+                        <small>Descuento adicional a aplicar (0-100%). Se aplicará sobre todos los turnos nuevos.</small>
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">
                             💾 Guardar Configuración

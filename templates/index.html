@@ -11,6 +11,7 @@
         <header>
             <h1>🎾 Sistema de Reserva de Turnos - Pádel</h1>
             <nav>
+                <button onclick="abrirModalFinanzas()" class="btn-secondary">💰 Finanzas</button>
                 <button onclick="abrirModalPersonalizacion()" class="btn-customize">🎨 Personalizar</button>
                 <button onclick="abrirModalTurnosFijos()" class="btn-secondary">📋 Turnos Fijos</button>
                 <a href="/configuracion" class="btn-secondary">⚙️ Configuración</a>
@@ -137,6 +138,72 @@
 
             <div class="form-actions" style="margin-top: 30px;">
                 <button type="button" class="btn-secondary" onclick="cerrarModalPersonalizacion()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Finanzas -->
+    <div id="modalFinanzas" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <span class="close" onclick="cerrarModalFinanzas()">&times;</span>
+            <h2>💰 Reporte Financiero</h2>
+            
+            <div class="form-group" style="margin-bottom: 25px;">
+                <label for="fechaFinanzas">📅 Seleccionar Fecha:</label>
+                <input type="date" id="fechaFinanzas" name="fechaFinanzas" style="max-width: 250px;">
+                <button onclick="cargarReporteFinanzas()" class="btn-primary" style="margin-left: 15px;">
+                    📊 Ver Reporte
+                </button>
+            </div>
+
+            <div id="reporteFinanzas" style="display: none;">
+                <!-- Resumen -->
+                <div style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 1.5em;">📈 Resumen del Día</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Total Recaudado</div>
+                            <div style="font-size: 2em; font-weight: bold;" id="totalRecaudado">$0</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Total Turnos</div>
+                            <div style="font-size: 2em; font-weight: bold;" id="totalTurnos">0</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Descuentos Aplicados</div>
+                            <div style="font-size: 2em; font-weight: bold; color: #ffd700;" id="totalDescuentos">$0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desglose -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <div style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; border: 2px solid var(--border-color);">
+                        <h4 style="margin: 0 0 10px 0; color: var(--primary-color);">💵 Turnos Regulares</h4>
+                        <div style="font-size: 1.5em; font-weight: bold;" id="turnosRegulares">0 turnos</div>
+                    </div>
+                    <div style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; border: 2px solid var(--border-color);">
+                        <h4 style="margin: 0 0 10px 0; color: var(--success-color);">🔁 Turnos Fijos</h4>
+                        <div style="font-size: 1.5em; font-weight: bold;" id="turnosFijos">0 turnos</div>
+                    </div>
+                </div>
+
+                <!-- Detalle de turnos -->
+                <div>
+                    <h3 style="margin-bottom: 15px;">📋 Detalle de Turnos</h3>
+                    <div id="detalleFinanzas" style="max-height: 400px; overflow-y: auto;">
+                        <!-- Se carga dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Promoción activa -->
+                <div id="promocionActiva" style="display: none; background-color: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 10px; margin-top: 20px;">
+                    <strong>🎁 Promoción Activa:</strong> <span id="textoPromocion"></span>
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 20px;">
+                <button type="button" class="btn-secondary" onclick="cerrarModalFinanzas()">Cerrar</button>
             </div>
         </div>
     </div>

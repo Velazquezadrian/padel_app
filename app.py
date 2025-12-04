@@ -23,7 +23,10 @@ def cargar_config():
         'cantidad_canchas': 2,
         'horario_inicio': '08:00',
         'horario_fin': '22:00',
-        'duracion_turno': 90  # minutos
+        'duracion_turno': 90,  # minutos
+        'precio_turno_regular': 10000,  # Precio por turno normal
+        'precio_turno_fijo': 9000,  # Precio por turno fijo (puede ser menor)
+        'descuento_promocion': 0  # Porcentaje de descuento (0-100)
     }
 
 def guardar_config(config):
@@ -248,6 +251,13 @@ def reservar_turno():
                         'message': 'Ya existe un turno fijo para este día y horario en esta cancha'
                     }), 400
             
+            # Calcular precios
+            config = cargar_config()
+            precio_base = config.get('precio_turno_fijo', 9000)
+            descuento_porcentaje = config.get('descuento_promocion', 0)
+            descuento_aplicado = precio_base * (descuento_porcentaje / 100)
+            precio_final = precio_base - descuento_aplicado
+            
             # Crear turno fijo
             turno_fijo = {
                 'id': nuevo_id,
@@ -257,7 +267,11 @@ def reservar_turno():
                 'cancha_id': cancha_id,
                 'nombre_cliente': nombre_cliente,
                 'telefono_cliente': telefono_cliente,
-                'fecha_creacion': datetime.now().isoformat()
+                'fecha_creacion': datetime.now().isoformat(),
+                'precio_base': precio_base,
+                'descuento_porcentaje': descuento_porcentaje,
+                'descuento_aplicado': descuento_aplicado,
+                'precio_final': precio_final
             }
             
             turnos_fijos.append(turno_fijo)
@@ -283,11 +297,23 @@ def reservar_turno():
                     'message': 'Esta cancha ya está reservada para este horario'
                 }), 400
             
+            # Calcular precios
+            config = cargar_config()
+            precio_base = config.get('precio_turno_regular', 10000)
+            descuento_porcentaje = config.get('descuento_promocion', 0)
+            descuento_aplicado = precio_base * (descuento_porcentaje / 100)
+            precio_final = precio_base - descuento_aplicado
+            
             # Crear reserva
             reservas[clave_fecha_hora][cancha_id] = {
                 'nombre': nombre_cliente,
                 'telefono': telefono_cliente,
-                'fecha_reserva': datetime.now().isoformat()
+                'fecha_reserva': datetime.now().isoformat(),
+                'es_fijo': False,
+                'precio_base': precio_base,
+                'descuento_porcentaje': descuento_porcentaje,
+                'descuento_aplicado': descuento_aplicado,
+                'precio_final': precio_final
             }
             
             guardar_reservas(reservas)
@@ -451,6 +477,92 @@ def api_obtener_tema():
     try:
         tema_data = cargar_tema()
         return jsonify({'success': True, 'tema': tema_data.get('tema', 'clasico')})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/finanzas/reporte_diario', methods=['POST'])
+def api_reporte_finanzas():
+    """Genera reporte financiero para una fecha específica"""
+    try:
+        data = request.get_json()
+        fecha = data.get('fecha', datetime.now().strftime('%Y-%m-%d'))
+        
+        reservas = cargar_reservas()
+        turnos_fijos = cargar_turnos_fijos()
+        ausencias = cargar_ausencias()
+        config = cargar_config()
+        
+        # Parse fecha
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+        dia_semana = fecha_obj.weekday()
+        
+        total_recaudado = 0
+        turnos_regulares_count = 0
+        turnos_fijos_count = 0
+        total_descuentos = 0
+        detalle_turnos = []
+        
+        # Revisar turnos fijos para ese día
+        for turno_fijo in turnos_fijos:
+            if turno_fijo['dia_semana'] == dia_semana:
+                # Verificar si no está ausente
+                clave_ausencia = f"{fecha}_{turno_fijo['horario']}_{turno_fijo['cancha_id']}"
+                esta_ausente = any(a['clave'] == clave_ausencia for a in ausencias)
+                
+                if not esta_ausente:
+                    precio_final = turno_fijo.get('precio_final', turno_fijo.get('precio_base', config.get('precio_turno_fijo', 9000)))
+                    descuento = turno_fijo.get('descuento_aplicado', 0)
+                    
+                    total_recaudado += precio_final
+                    total_descuentos += descuento
+                    turnos_fijos_count += 1
+                    
+                    detalle_turnos.append({
+                        'tipo': 'Turno Fijo',
+                        'horario': turno_fijo['horario'],
+                        'cancha': turno_fijo['cancha_id'],
+                        'cliente': turno_fijo['nombre_cliente'],
+                        'precio_base': turno_fijo.get('precio_base', config.get('precio_turno_fijo', 9000)),
+                        'descuento': descuento,
+                        'precio_final': precio_final
+                    })
+        
+        # Revisar reservas regulares para esa fecha
+        for clave_fecha_hora, canchas in reservas.items():
+            if clave_fecha_hora.startswith(fecha):
+                for cancha_id, reserva in canchas.items():
+                    if not reserva.get('es_fijo', False):  # Solo contar regulares
+                        horario = clave_fecha_hora.split('_')[1]
+                        precio_final = reserva.get('precio_final', reserva.get('precio_base', config.get('precio_turno_regular', 10000)))
+                        descuento = reserva.get('descuento_aplicado', 0)
+                        
+                        total_recaudado += precio_final
+                        total_descuentos += descuento
+                        turnos_regulares_count += 1
+                        
+                        detalle_turnos.append({
+                            'tipo': 'Turno Regular',
+                            'horario': horario,
+                            'cancha': cancha_id,
+                            'cliente': reserva['nombre'],
+                            'precio_base': reserva.get('precio_base', config.get('precio_turno_regular', 10000)),
+                            'descuento': descuento,
+                            'precio_final': precio_final
+                        })
+        
+        return jsonify({
+            'success': True,
+            'fecha': fecha,
+            'resumen': {
+                'total_recaudado': total_recaudado,
+                'turnos_regulares': turnos_regulares_count,
+                'turnos_fijos': turnos_fijos_count,
+                'total_turnos': turnos_regulares_count + turnos_fijos_count,
+                'total_descuentos': total_descuentos,
+                'descuento_promocion_actual': config.get('descuento_promocion', 0)
+            },
+            'detalle': detalle_turnos
+        })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
