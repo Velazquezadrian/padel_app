@@ -2,16 +2,32 @@ from flask import Flask, render_template, request, jsonify, session
 from datetime import datetime, timedelta
 import json
 import os
+import sys
 
-app = Flask(__name__)
+# Detectar si estamos ejecutando desde PyInstaller
+if getattr(sys, 'frozen', False):
+    # Ejecutable empaquetado
+    application_path = sys._MEIPASS
+    # Usar carpeta de datos del usuario
+    data_path = os.path.join(os.environ['APPDATA'], 'PadelApp')
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+else:
+    # Modo desarrollo
+    application_path = os.path.dirname(os.path.abspath(__file__))
+    data_path = application_path
+
+app = Flask(__name__, 
+            template_folder=os.path.join(application_path, 'templates'),
+            static_folder=os.path.join(application_path, 'static'))
 app.secret_key = 'tu_clave_secreta_aqui_cambiar_en_produccion'
 
-# Archivo para guardar configuración
-CONFIG_FILE = 'config.json'
-RESERVAS_FILE = 'reservas.json'
-TURNOS_FIJOS_FILE = 'turnos_fijos.json'
-AUSENCIAS_FILE = 'ausencias.json'
-TEMA_FILE = 'tema.json'
+# Archivos para guardar configuración (en carpeta de datos del usuario)
+CONFIG_FILE = os.path.join(data_path, 'config.json')
+RESERVAS_FILE = os.path.join(data_path, 'reservas.json')
+TURNOS_FIJOS_FILE = os.path.join(data_path, 'turnos_fijos.json')
+AUSENCIAS_FILE = os.path.join(data_path, 'ausencias.json')
+TEMA_FILE = os.path.join(data_path, 'tema.json')
 
 def cargar_config():
     """Carga la configuración del sistema"""
@@ -230,6 +246,8 @@ def reservar_turno():
         nombre_cliente = data.get('nombre_cliente', 'Sin nombre')
         telefono_cliente = data.get('telefono_cliente', '')
         es_fijo = data.get('es_fijo', False)
+        productos_extras = data.get('productos_extras', '')
+        precio_extras = float(data.get('precio_extras', 0))
         
         if es_fijo:
             # Crear turno fijo recurrente
@@ -271,7 +289,9 @@ def reservar_turno():
                 'precio_base': precio_base,
                 'descuento_porcentaje': descuento_porcentaje,
                 'descuento_aplicado': descuento_aplicado,
-                'precio_final': precio_final
+                'precio_final': precio_final,
+                'productos_extras': productos_extras,
+                'precio_extras': precio_extras
             }
             
             turnos_fijos.append(turno_fijo)
@@ -313,7 +333,9 @@ def reservar_turno():
                 'precio_base': precio_base,
                 'descuento_porcentaje': descuento_porcentaje,
                 'descuento_aplicado': descuento_aplicado,
-                'precio_final': precio_final
+                'precio_final': precio_final,
+                'productos_extras': productos_extras,
+                'precio_extras': precio_extras
             }
             
             guardar_reservas(reservas)
@@ -500,6 +522,7 @@ def api_reporte_finanzas():
         turnos_regulares_count = 0
         turnos_fijos_count = 0
         total_descuentos = 0
+        total_extras = 0
         detalle_turnos = []
         
         # Revisar turnos fijos para ese día
@@ -512,9 +535,11 @@ def api_reporte_finanzas():
                 if not esta_ausente:
                     precio_final = turno_fijo.get('precio_final', turno_fijo.get('precio_base', config.get('precio_turno_fijo', 9000)))
                     descuento = turno_fijo.get('descuento_aplicado', 0)
+                    precio_extras = turno_fijo.get('precio_extras', 0)
                     
-                    total_recaudado += precio_final
+                    total_recaudado += precio_final + precio_extras
                     total_descuentos += descuento
+                    total_extras += precio_extras
                     turnos_fijos_count += 1
                     
                     detalle_turnos.append({
@@ -524,7 +549,9 @@ def api_reporte_finanzas():
                         'cliente': turno_fijo['nombre_cliente'],
                         'precio_base': turno_fijo.get('precio_base', config.get('precio_turno_fijo', 9000)),
                         'descuento': descuento,
-                        'precio_final': precio_final
+                        'precio_final': precio_final,
+                        'productos_extras': turno_fijo.get('productos_extras', ''),
+                        'precio_extras': precio_extras
                     })
         
         # Revisar reservas regulares para esa fecha
@@ -535,9 +562,11 @@ def api_reporte_finanzas():
                         horario = clave_fecha_hora.split('_')[1]
                         precio_final = reserva.get('precio_final', reserva.get('precio_base', config.get('precio_turno_regular', 10000)))
                         descuento = reserva.get('descuento_aplicado', 0)
+                        precio_extras = reserva.get('precio_extras', 0)
                         
-                        total_recaudado += precio_final
+                        total_recaudado += precio_final + precio_extras
                         total_descuentos += descuento
+                        total_extras += precio_extras
                         turnos_regulares_count += 1
                         
                         detalle_turnos.append({
@@ -547,7 +576,9 @@ def api_reporte_finanzas():
                             'cliente': reserva['nombre'],
                             'precio_base': reserva.get('precio_base', config.get('precio_turno_regular', 10000)),
                             'descuento': descuento,
-                            'precio_final': precio_final
+                            'precio_final': precio_final,
+                            'productos_extras': reserva.get('productos_extras', ''),
+                            'precio_extras': precio_extras
                         })
         
         return jsonify({
@@ -559,6 +590,7 @@ def api_reporte_finanzas():
                 'turnos_fijos': turnos_fijos_count,
                 'total_turnos': turnos_regulares_count + turnos_fijos_count,
                 'total_descuentos': total_descuentos,
+                'total_extras': total_extras,
                 'descuento_promocion_actual': config.get('descuento_promocion', 0)
             },
             'detalle': detalle_turnos

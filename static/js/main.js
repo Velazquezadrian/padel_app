@@ -287,6 +287,8 @@ async function realizarReserva() {
     const nombreCliente = document.getElementById('nombreCliente').value;
     const telefonoCliente = document.getElementById('telefonoCliente').value;
     const esFijo = document.getElementById('esFijo').checked;
+    const productosExtras = document.getElementById('productosExtras').value.trim();
+    const precioExtras = parseFloat(document.getElementById('precioExtras').value) || 0;
     
     if (!nombreCliente) {
         alert('Por favor ingrese un nombre');
@@ -310,7 +312,9 @@ async function realizarReserva() {
                 nombre_cliente: nombreCliente,
                 telefono_cliente: telefonoCliente,
                 fecha: fechaSeleccionada,
-                es_fijo: esFijo
+                es_fijo: esFijo,
+                productos_extras: productosExtras,
+                precio_extras: precioExtras
             })
         });
         
@@ -680,6 +684,7 @@ function mostrarReporteFinanzas(data) {
     // Resumen
     document.getElementById('totalRecaudado').textContent = formatoPrecio(data.resumen.total_recaudado);
     document.getElementById('totalTurnos').textContent = data.resumen.total_turnos;
+    document.getElementById('totalExtras').textContent = formatoPrecio(data.resumen.total_extras || 0);
     document.getElementById('totalDescuentos').textContent = formatoPrecio(data.resumen.total_descuentos);
     
     document.getElementById('turnosRegulares').textContent = data.resumen.turnos_regulares + ' turnos';
@@ -705,6 +710,7 @@ function mostrarReporteFinanzas(data) {
         data.detalle.forEach(turno => {
             const tipoColor = turno.tipo === 'Turno Fijo' ? 'var(--success-color)' : 'var(--primary-color)';
             const tipoIcon = turno.tipo === 'Turno Fijo' ? '🔁' : '💵';
+            const tieneExtras = turno.precio_extras && turno.precio_extras > 0;
             
             html += `
                 <div style="background-color: var(--card-bg); border: 2px solid var(--border-color); border-left: 5px solid ${tipoColor}; padding: 15px; border-radius: 10px;">
@@ -716,6 +722,9 @@ function mostrarReporteFinanzas(data) {
                             <div style="font-size: 0.9em; color: var(--text-light);">
                                 ⏰ ${turno.horario} | 🎾 Cancha ${turno.cancha} | 👤 ${turno.cliente}
                             </div>
+                            ${tieneExtras ? `<div style="font-size: 0.85em; color: #17a2b8; margin-top: 5px;">
+                                🧃 ${turno.productos_extras}
+                            </div>` : ''}
                         </div>
                         <div style="text-align: right;">
                             <div style="font-size: 0.85em; color: var(--text-light); text-decoration: ${turno.descuento > 0 ? 'line-through' : 'none'};">
@@ -725,6 +734,9 @@ function mostrarReporteFinanzas(data) {
                             <div style="font-size: 1.3em; font-weight: bold; color: var(--success-color);">
                                 ${formatoPrecio(turno.precio_final)}
                             </div>
+                            ${tieneExtras ? `<div style="font-size: 0.9em; color: #17a2b8; margin-top: 3px;">
+                                + ${formatoPrecio(turno.precio_extras)} (extras)
+                            </div>` : ''}
                         </div>
                     </div>
                 </div>

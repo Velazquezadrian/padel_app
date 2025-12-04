@@ -71,6 +71,22 @@
                     </label>
                     <p class="helper-text" id="diaSemanaMensaje" style="display:none; margin-top: 10px; color: #666; font-size: 14px;"></p>
                 </div>
+                
+                <h3 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary-color); border-top: 2px solid var(--border-color); padding-top: 15px;">
+                    🛒 Productos Adicionales (Opcional)
+                </h3>
+                
+                <div class="form-group">
+                    <label for="productosExtras">Descripción de productos:</label>
+                    <textarea id="productosExtras" name="productosExtras" rows="3" placeholder="Ej: 2 aguas, 1 pelota Wilson, etc."></textarea>
+                    <small>Ingresa los productos que compró el cliente (opcional)</small>
+                </div>
+                <div class="form-group">
+                    <label for="precioExtras">💵 Precio Total de Productos:</label>
+                    <input type="number" id="precioExtras" name="precioExtras" min="0" step="100" value="0" placeholder="0">
+                    <small>Monto total de los productos adicionales</small>
+                </div>
+                
                 <div class="reserva-info">
                     <p><strong>Fecha:</strong> <span id="infoFecha"></span></p>
                     <p><strong>Horario:</strong> <span id="infoHorario"></span></p>
@@ -160,7 +176,7 @@
                 <!-- Resumen -->
                 <div style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
                     <h3 style="margin: 0 0 20px 0; font-size: 1.5em;">📈 Resumen del Día</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px;">
                         <div>
                             <div style="font-size: 0.9em; opacity: 0.9;">Total Recaudado</div>
                             <div style="font-size: 2em; font-weight: bold;" id="totalRecaudado">$0</div>
@@ -170,7 +186,11 @@
                             <div style="font-size: 2em; font-weight: bold;" id="totalTurnos">0</div>
                         </div>
                         <div>
-                            <div style="font-size: 0.9em; opacity: 0.9;">Descuentos Aplicados</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Productos Extras</div>
+                            <div style="font-size: 2em; font-weight: bold; color: #17a2b8;" id="totalExtras">$0</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Descuentos</div>
                             <div style="font-size: 2em; font-weight: bold; color: #ffd700;" id="totalDescuentos">$0</div>
                         </div>
                     </div>
