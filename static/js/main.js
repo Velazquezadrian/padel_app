@@ -234,10 +234,19 @@ function mostrarCanchas(canchas) {
                 <div class="reserva-info-card">
                     <p><strong>Reservado por:</strong> ${cancha.reserva.nombre}</p>
                     ${cancha.reserva.telefono ? `<p><strong>📞 Teléfono:</strong> ${cancha.reserva.telefono}</p>` : ''}
+                    ${(cancha.reserva.productos_extras && cancha.reserva.precio_extras > 0) ? `
+                        <div style="background-color: #e7f6f8; padding: 8px; border-radius: 5px; margin: 8px 0;">
+                            <p style="margin: 0; font-size: 0.85em; color: #17a2b8;"><strong>🧃 Productos:</strong> ${cancha.reserva.productos_extras}</p>
+                            <p style="margin: 0; font-size: 0.85em; color: #17a2b8;"><strong>💵 Total extras:</strong> $${Math.round(cancha.reserva.precio_extras).toLocaleString('es-AR')}</p>
+                        </div>
+                    ` : ''}
                     ${esFijo ? '<p class="turno-fijo-badge">🔁 Turno Fijo Semanal</p>' : ''}
                     ${esFijo ? `<button class="btn-warning" onclick="marcarAusencia('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})" style="margin-bottom: 10px;">
                         ⚠️ Marcar Ausencia
                     </button>` : ''}
+                    <button class="btn-secondary" onclick="abrirModalProductos('${cancha.id}', ${cancha.numero}, ${esFijo}, ${idTurnoFijo})" style="margin-bottom: 10px;">
+                        🛒 Agregar Productos
+                    </button>
                     <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})">
                         ❌ ${esFijo ? 'Eliminar Turno Fijo' : 'Cancelar Reserva'}
                     </button>
@@ -287,8 +296,6 @@ async function realizarReserva() {
     const nombreCliente = document.getElementById('nombreCliente').value;
     const telefonoCliente = document.getElementById('telefonoCliente').value;
     const esFijo = document.getElementById('esFijo').checked;
-    const productosExtras = document.getElementById('productosExtras').value.trim();
-    const precioExtras = parseFloat(document.getElementById('precioExtras').value) || 0;
     
     if (!nombreCliente) {
         alert('Por favor ingrese un nombre');
@@ -313,8 +320,8 @@ async function realizarReserva() {
                 telefono_cliente: telefonoCliente,
                 fecha: fechaSeleccionada,
                 es_fijo: esFijo,
-                productos_extras: productosExtras,
-                precio_extras: precioExtras
+                productos_extras: '',
+                precio_extras: 0
             })
         });
         
@@ -745,5 +752,92 @@ function mostrarReporteFinanzas(data) {
         
         html += '</div>';
         detalleDiv.innerHTML = html;
+    }
+}
+
+// ============================================
+// FUNCIONES DE PRODUCTOS EXTRAS
+// ============================================
+
+let datosProductosActual = {};
+
+function abrirModalProductos(canchaId, numeroCancha, esFijo, idTurnoFijo) {
+    datosProductosActual = {
+        canchaId: canchaId,
+        numeroCancha: numeroCancha,
+        horario: horarioSeleccionado,
+        fecha: fechaSeleccionada,
+        esFijo: esFijo,
+        idTurnoFijo: idTurnoFijo
+    };
+    
+    document.getElementById('infoProductosReserva').innerHTML = `
+        <p><strong>Cancha:</strong> ${numeroCancha}</p>
+        <p><strong>Horario:</strong> ${horarioSeleccionado}</p>
+        <p><strong>Fecha:</strong> ${new Date(fechaSeleccionada).toLocaleDateString('es-ES')}</p>
+    `;
+    
+    // Limpiar campos
+    document.getElementById('productosExtrasModal').value = '';
+    document.getElementById('precioExtrasModal').value = '';
+    
+    const modal = document.getElementById('modalProductos');
+    modal.style.display = 'block';
+}
+
+function cerrarModalProductos() {
+    const modal = document.getElementById('modalProductos');
+    modal.style.display = 'none';
+    datosProductosActual = {};
+}
+
+// Event listener para formulario de productos
+document.addEventListener('DOMContentLoaded', function() {
+    const formProductos = document.getElementById('formProductos');
+    if (formProductos) {
+        formProductos.addEventListener('submit', function(e) {
+            e.preventDefault();
+            guardarProductos();
+        });
+    }
+});
+
+async function guardarProductos() {
+    const productos = document.getElementById('productosExtrasModal').value.trim();
+    const precio = parseFloat(document.getElementById('precioExtrasModal').value);
+    
+    if (!productos || precio <= 0) {
+        alert('Por favor ingrese productos y un precio válido');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/agregar_productos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fecha: datosProductosActual.fecha,
+                horario: datosProductosActual.horario,
+                cancha_id: datosProductosActual.canchaId,
+                es_fijo: datosProductosActual.esFijo,
+                id_turno_fijo: datosProductosActual.idTurnoFijo,
+                productos_extras: productos,
+                precio_extras: precio
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ Productos agregados correctamente');
+            cerrarModalProductos();
+            cargarCanchas(horarioSeleccionado);
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
     }
 }

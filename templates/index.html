@@ -71,22 +71,6 @@
                     </label>
                     <p class="helper-text" id="diaSemanaMensaje" style="display:none; margin-top: 10px; color: #666; font-size: 14px;"></p>
                 </div>
-                
-                <h3 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary-color); border-top: 2px solid var(--border-color); padding-top: 15px;">
-                    🛒 Productos Adicionales (Opcional)
-                </h3>
-                
-                <div class="form-group">
-                    <label for="productosExtras">Descripción de productos:</label>
-                    <textarea id="productosExtras" name="productosExtras" rows="3" placeholder="Ej: 2 aguas, 1 pelota Wilson, etc."></textarea>
-                    <small>Ingresa los productos que compró el cliente (opcional)</small>
-                </div>
-                <div class="form-group">
-                    <label for="precioExtras">💵 Precio Total de Productos:</label>
-                    <input type="number" id="precioExtras" name="precioExtras" min="0" step="100" value="0" placeholder="0">
-                    <small>Monto total de los productos adicionales</small>
-                </div>
-                
                 <div class="reserva-info">
                     <p><strong>Fecha:</strong> <span id="infoFecha"></span></p>
                     <p><strong>Horario:</strong> <span id="infoHorario"></span></p>
@@ -108,6 +92,33 @@
             <div id="listaTurnosFijos">
                 <!-- Se carga dinámicamente -->
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Productos Extras -->
+    <div id="modalProductos" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close" onclick="cerrarModalProductos()">&times;</span>
+            <h2>🛒 Agregar Productos</h2>
+            <form id="formProductos">
+                <div class="form-group">
+                    <label for="productosExtrasModal">Descripción de productos:</label>
+                    <textarea id="productosExtrasModal" name="productosExtrasModal" rows="3" placeholder="Ej: 2 aguas ($500 c/u), 1 grip ($1500)" required></textarea>
+                    <small>Describe los productos que compró el cliente</small>
+                </div>
+                <div class="form-group">
+                    <label for="precioExtrasModal">💵 Precio Total:</label>
+                    <input type="number" id="precioExtrasModal" name="precioExtrasModal" min="0" step="100" placeholder="0" required>
+                    <small>Monto total de los productos</small>
+                </div>
+                <div class="reserva-info" id="infoProductosReserva">
+                    <!-- Info de la reserva -->
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">✅ Guardar Productos</button>
+                    <button type="button" class="btn-secondary" onclick="cerrarModalProductos()">❌ Cancelar</button>
+                </div>
+            </form>
         </div>
     </div>
 

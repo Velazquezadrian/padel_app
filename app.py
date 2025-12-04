@@ -476,6 +476,47 @@ def cancelar_ausencia():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
+@app.route('/api/agregar_productos', methods=['POST'])
+def api_agregar_productos():
+    """API para agregar productos extras a una reserva existente"""
+    try:
+        data = request.get_json()
+        fecha = data['fecha']
+        horario = data['horario']
+        cancha_id = data['cancha_id']
+        es_fijo = data.get('es_fijo', False)
+        id_turno_fijo = data.get('id_turno_fijo', None)
+        productos_extras = data.get('productos_extras', '')
+        precio_extras = float(data.get('precio_extras', 0))
+        
+        if es_fijo and id_turno_fijo:
+            # Actualizar turno fijo
+            turnos_fijos = cargar_turnos_fijos()
+            for turno in turnos_fijos:
+                if turno['id'] == id_turno_fijo:
+                    turno['productos_extras'] = productos_extras
+                    turno['precio_extras'] = precio_extras
+                    break
+            guardar_turnos_fijos(turnos_fijos)
+        else:
+            # Actualizar reserva regular
+            reservas = cargar_reservas()
+            clave_fecha_hora = f"{fecha}_{horario}"
+            
+            if clave_fecha_hora in reservas and cancha_id in reservas[clave_fecha_hora]:
+                reservas[clave_fecha_hora][cancha_id]['productos_extras'] = productos_extras
+                reservas[clave_fecha_hora][cancha_id]['precio_extras'] = precio_extras
+                guardar_reservas(reservas)
+            else:
+                return jsonify({'success': False, 'message': 'Reserva no encontrada'}), 404
+        
+        return jsonify({
+            'success': True,
+            'message': 'Productos agregados correctamente'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
 @app.route('/api/guardar_tema', methods=['POST'])
 def api_guardar_tema():
     """Guarda el tema seleccionado por el usuario"""
