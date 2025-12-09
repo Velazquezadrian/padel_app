@@ -18,6 +18,9 @@ reservas.json
 turnos_fijos.json
 ausencias.json
 tema.json
+licencia.dat
+registro_clientes.json
+seriales_usados.json
 
 # Logs
 *.log
@@ -43,7 +46,17 @@ build/
 *.egg-info/
 *.spec
 installer/
+Paquetes_Finales/
+*.zip
 
 # PyInstaller
 *.manifest
 *.exe
+
+# Archivos de prueba y demos
+demo_*.py
+test_*.py
+*_prueba.py
+*.bat
+*.vbs
+SERIALES_PRUEBA.txt

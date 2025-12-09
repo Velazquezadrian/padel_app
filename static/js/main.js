@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar tema guardado
     cargarTemaGuardado();
     
+    // Verificar licencia
+    verificarLicencia();
+    
     // Configurar fecha actual
     const inputFecha = document.getElementById('fecha');
     const hoy = new Date().toISOString().split('T')[0];
@@ -932,3 +935,36 @@ document.getElementById('formImportarBackup').addEventListener('submit', async f
         mensajeDiv.textContent = '❌ Error: ' + error.message;
     }
 });
+
+// ====================================
+// VERIFICACIÓN DE LICENCIA
+// ====================================
+
+async function verificarLicencia() {
+    try {
+        const response = await fetch('/api/info_licencia');
+        const data = await response.json();
+        
+        if (data.success && data.valida) {
+            const badge = document.getElementById('licenciaInfo');
+            
+            if (data.dias_restantes <= 7) {
+                // Advertencia - licencia por vencer
+                badge.style.display = 'block';
+                badge.style.backgroundColor = '#fff3cd';
+                badge.style.color = '#856404';
+                badge.style.border = '2px solid #ffc107';
+                badge.innerHTML = `⚠️ Licencia: ${data.dias_restantes} días restantes`;
+            } else {
+                // Licencia válida
+                badge.style.display = 'block';
+                badge.style.backgroundColor = '#d4edda';
+                badge.style.color = '#155724';
+                badge.style.border = '2px solid #28a745';
+                badge.innerHTML = `✅ Licencia válida hasta ${data.fecha_expiracion}`;
+            }
+        }
+    } catch (error) {
+        console.error('Error al verificar licencia:', error);
+    }
+}

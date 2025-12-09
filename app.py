@@ -4,6 +4,7 @@ import json
 import os
 import sys
 from io import BytesIO
+from licencia_manager import LicenciaManager
 
 # Detectar si estamos ejecutando desde PyInstaller
 if getattr(sys, 'frozen', False):
@@ -888,6 +889,86 @@ def importar_backup():
         return jsonify({'success': False, 'message': 'El archivo JSON no es válido'}), 400
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error al importar: {str(e)}'}), 400
+
+@app.route('/licencia')
+def pagina_licencia():
+    """Página de gestión de licencia"""
+    return render_template('licencia.html')
+
+@app.route('/api/info_licencia', methods=['GET'])
+def info_licencia():
+    """Obtiene información de la licencia actual"""
+    try:
+        # Detectar ruta de licencia
+        if getattr(sys, 'frozen', False):
+            base_path = os.path.dirname(sys.executable)
+        else:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+        
+        archivo_licencia = os.path.join(base_path, 'licencia.dat')
+        manager = LicenciaManager(archivo_licencia)
+        
+        es_valida, dias_restantes, mensaje = manager.verificar_licencia()
+        info = manager.obtener_info_licencia()
+        
+        if info:
+            fecha_exp = datetime.fromisoformat(info['fecha_expiracion'])
+            return jsonify({
+                'success': True,
+                'valida': es_valida,
+                'cliente': info.get('cliente', 'N/A'),
+                'tipo': info.get('tipo', 'N/A'),
+                'fecha_expiracion': fecha_exp.strftime('%d/%m/%Y'),
+                'dias_restantes': dias_restantes,
+                'mensaje': mensaje
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'valida': False,
+                'mensaje': 'No se encontró archivo de licencia'
+            })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'mensaje': f'Error al verificar licencia: {str(e)}'
+        }), 400
+
+@app.route('/api/aplicar_serial', methods=['POST'])
+def aplicar_serial():
+    """Aplica un serial de licencia"""
+    try:
+        data = request.get_json()
+        serial = data.get('serial', '').strip()
+        
+        if not serial:
+            return jsonify({
+                'success': False,
+                'mensaje': 'Serial vacío'
+            }), 400
+        
+        # Detectar ruta de licencia
+        if getattr(sys, 'frozen', False):
+            base_path = os.path.dirname(sys.executable)
+        else:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+        
+        archivo_licencia = os.path.join(base_path, 'licencia.dat')
+        manager = LicenciaManager(archivo_licencia)
+        
+        exito, mensaje = manager.aplicar_serial(serial)
+        
+        return jsonify({
+            'success': exito,
+            'mensaje': mensaje
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'mensaje': f'Error al aplicar serial: {str(e)}'
+        }), 400
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

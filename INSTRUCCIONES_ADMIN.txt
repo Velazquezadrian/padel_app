@@ -1,0 +1,208 @@
+================================================================================
+          INSTRUCCIONES PARA ADMINISTRADOR - GENERADOR DE SERIALES
+================================================================================
+
+📋 CONTENIDO DEL PAQUETE ADMIN
+------------------------------
+✓ GeneradorSeriales.exe     - Aplicación para generar licencias (SOLO ADMIN)
+✓ Este documento            - Instrucciones de uso
+
+⚠️  IMPORTANTE: Este archivo NO debe entregarse a los clientes
+
+
+================================================================================
+📱 USO DEL GENERADOR DE SERIALES
+================================================================================
+
+1. ABRIR LA APLICACIÓN
+   • Doble clic en GeneradorSeriales.exe
+   • Se abrirá una ventana con interfaz gráfica
+
+2. COMPLETAR DATOS DEL CLIENTE (NUEVO ✨)
+   • Nombre: Ingresa el nombre del cliente
+   • Apellido: Ingresa el apellido del cliente
+   • Email/Teléfono: Ingresa el contacto del cliente
+   
+   ⚠️  IMPORTANTE: Todos los campos son OBLIGATORIOS
+   📝 Esta información se guarda en "registro_clientes.json"
+
+3. SELECCIONAR EL PLAN
+   • Trial (15 días) - Prueba gratuita
+   • Mensual (30 días)
+   • Trimestral (90 días)
+   • Semestral (180 días)
+   • Anual (365 días)
+   • Personalizada - Ingresa los días que desees
+
+4. GENERAR SERIAL
+   • Haz clic en "Generar Serial"
+   • El sistema:
+     ✅ Genera el serial
+     ✅ Guarda el registro del cliente automáticamente
+     ✅ Limpia los campos para el siguiente cliente
+     ✅ Muestra el serial completo
+
+5. COPIAR EL SERIAL
+   • Usa el botón "Copiar al Portapapeles"
+   • O selecciona el texto y copia manualmente (Ctrl+C)
+
+6. ENVIAR AL CLIENTE
+   • Pega el serial en un correo/WhatsApp/SMS
+   • El cliente lo pegará en la aplicación
+
+7. VER HISTORIAL DE CLIENTES (NUEVO ✨)
+   • Haz clic en "Ver Registros"
+   • Visualiza todos los clientes registrados
+   • Busca serials anteriores
+   • Verifica fechas de expiración
+
+
+================================================================================
+📊 TIPOS DE PLANES
+================================================================================
+
+┌─────────────┬──────────┬────────────────────────────────────────────────┐
+│    Plan     │   Días   │              Uso Recomendado                   │
+├─────────────┼──────────┼────────────────────────────────────────────────┤
+│   Trial     │    15    │ Prueba gratuita para nuevos clientes          │
+│  Mensual    │    30    │ Suscripción básica mes a mes                   │
+│ Trimestral  │    90    │ Plan económico para compromisos cortos         │
+│ Semestral   │   180    │ Plan semestral con descuento                   │
+│   Anual     │   365    │ Plan completo con mayor descuento              │
+│ Personaliz. │ Variable │ Cualquier cantidad de días que necesites       │
+└─────────────┴──────────┴────────────────────────────────────────────────┘
+
+
+================================================================================
+🔐 CARACTERÍSTICAS DE SEGURIDAD
+================================================================================
+
+✓ HARDWARE BINDING
+  Los seriales se vinculan al hardware del cliente en la primera activación.
+  No pueden compartirse con otros equipos.
+
+✓ SINGLE-USE
+  Cada serial solo puede activarse UNA vez.
+  Después de activado, queda registrado y no puede reutilizarse.
+
+✓ TRIAL PERSISTENCE
+  Los trials se registran en el sistema del cliente.
+  No pueden instalar infinitos trials, solo uno por equipo.
+
+✓ OFFLINE
+  Todo funciona sin conexión a internet.
+  Los clientes no necesitan red para usar la app.
+
+
+================================================================================
+📝 EJEMPLO DE SERIAL GENERADO
+================================================================================
+
+Cliente: Juan Pérez
+Plan: Trimestral (90 días)
+
+Serial:
+Z0FBQUFBQnBPRDNFUFRmWnZWY3NtZ2N0WEJTVFZVZVRVVlUtY0lld2pGbTVrT0RvVFo0WVk4TE95d
+nVYbEVmNHd5c0h2ZS0xd01PampfYWdSU1ZrSEJGQlQ3QVJHNWlXUXI2WWljNHRtcVB3X1JXRU5VR
+3poQWdDMWl3ZnVPSnhzdmhhQVJkWEI0aElId2JQZ2NqcGR1Nmpkci1YY1hBbGNFM2FDR0dwTnRka
+0RUUjZkUXBlTVYwYjh4bFZWTG1HaEUtanA2aWkzZklZ
+
+Información mostrada:
+• Nombre del cliente
+• Tipo de licencia (trimestral)
+• Días de validez (90)
+• Fecha de expiración
+• Serial completo listo para copiar
+
+
+================================================================================
+❓ PREGUNTAS FRECUENTES
+================================================================================
+
+Q: ¿Puedo generar múltiples serials para el mismo cliente?
+A: Sí, cada serial es único. Puedes generar varios si el cliente necesita
+   renovar su licencia.
+
+Q: ¿Qué pasa si el cliente cambia de computadora?
+A: Necesitará un nuevo serial. Los serials están ligados al hardware.
+
+Q: ¿Cuánto dura un serial antes de activarse?
+A: Los serials no caducan hasta que son activados. Una vez activados,
+   comienza a contar el tiempo del plan.
+
+Q: ¿Puedo ver qué serials he generado?
+A: Los serials generados se guardan automáticamente en el archivo
+   "seriales_usados.json" de la aplicación principal.
+
+Q: ¿El cliente puede extender su licencia?
+A: Sí, genera un nuevo serial y el cliente lo aplica. Se sumará al
+   tiempo restante o reemplazará la licencia actual.
+
+
+================================================================================
+📋 REGISTRO DE CLIENTES (NUEVO ✨)
+================================================================================
+
+ARCHIVO: registro_clientes.json
+UBICACIÓN: En la misma carpeta que GeneradorSeriales.exe
+
+CONTENIDO:
+   • ID único de cada cliente
+   • Nombre y apellido completo
+   • Email o teléfono de contacto
+   • Tipo de plan adquirido
+   • Cantidad de días del plan
+   • Fecha de generación del serial
+   • Fecha de expiración de la licencia
+   • Serial completo
+   • Serial ID corto
+
+VENTAJAS:
+   ✅ Historial completo de todas las ventas
+   ✅ Recuperación fácil de serials perdidos
+   ✅ Seguimiento de fechas de expiración
+   ✅ Base de datos de clientes para marketing
+   ✅ Análisis de ventas por tipo de plan
+   ✅ Contacto directo para renovaciones
+
+BACKUP:
+   ⚠️  IMPORTANTE: Haz backup regular de este archivo
+   • Copia a Google Drive / Dropbox semanalmente
+   • Es tu base de datos de clientes
+   • Si se pierde, pierdes todo el registro
+
+
+================================================================================
+📞 SOPORTE TÉCNICO
+================================================================================
+
+Si tienes problemas con el generador:
+
+1. Verifica que el archivo existe: GeneradorSeriales.exe
+2. Verifica que el icono se muestra correctamente
+3. Si no abre, ejecuta como administrador (clic derecho → Ejecutar como admin)
+4. Asegúrate de tener permisos de escritura en la carpeta
+5. Si no se guardan los registros, verifica que "registro_clientes.json" se pueda crear
+
+
+================================================================================
+🎯 DISTRIBUCIÓN AL CLIENTE
+================================================================================
+
+AL CLIENTE SE LE ENTREGA:
+✅ SistemaTurnosPadel.exe
+✅ LEEME_CLIENTE.txt
+✅ Carpeta templates (si aplica)
+✅ Carpeta static (si aplica)
+
+❌ NUNCA ENTREGAR AL CLIENTE:
+❌ GeneradorSeriales.exe
+❌ INSTRUCCIONES_ADMIN.txt
+❌ licencia_manager.py
+❌ Archivo seriales_usados.json
+❌ Cualquier archivo .py
+
+
+================================================================================
+                            ¡LISTO PARA USAR!
+================================================================================

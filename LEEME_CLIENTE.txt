@@ -1,0 +1,235 @@
+# 🎾 Sistema de Turnos de Pádel
+
+## 🎁 PRUEBA GRATUITA DE 15 DÍAS INCLUIDA
+
+Gracias por descargar el Sistema de Turnos de Pádel. Esta aplicación incluye automáticamente **15 días de prueba GRATIS** con acceso completo a todas las funciones.
+
+---
+
+## 📥 Instalación Rápida
+
+### Opción 1: Instalador Completo (Recomendado)
+
+1. **Ejecutar** `SistemaTurnosPadel_Setup.exe`
+2. **Seguir** el asistente de instalación
+3. **Finalizar** - La aplicación se abrirá automáticamente
+4. ✅ **¡Listo para usar!** - Tu prueba de 15 días comienza ahora
+
+### Opción 2: Versión Portable (Sin instalación)
+
+1. **Extraer** el archivo ZIP en cualquier carpeta
+2. **Ejecutar** `SistemaTurnosPadel.exe`
+3. ✅ **¡Listo para usar!** - Tu prueba de 15 días comienza ahora
+
+---
+
+## ⚡ Primeros Pasos
+
+### 1. Configuración Inicial
+
+Al abrir la aplicación por primera vez:
+
+1. Ir a **⚙️ Configuración**
+2. Configurar:
+   - Cantidad de canchas (por defecto: 2)
+   - Horarios de apertura y cierre
+   - Duración de turnos (90 minutos)
+   - Precios base
+
+### 2. Personalizar Apariencia
+
+1. Ir a **🎨 Personalizar**
+2. Elegir colores para:
+   - Tema general
+   - Botones y encabezados
+   - Canchas disponibles/ocupadas
+
+### 3. Hacer una Reserva
+
+1. **Seleccionar fecha** en el calendario
+2. **Elegir horario** disponible
+3. **Seleccionar cancha**
+4. **Ingresar datos del cliente**
+   - Nombre
+   - Teléfono
+   - Opción de turno fijo (se repite cada semana)
+
+---
+
+## 🔐 Gestión de Licencia
+
+### Durante el Trial (15 días)
+
+- ✅ Acceso completo a todas las funciones
+- ✅ Sin límite de reservas
+- ✅ Sin tarjeta de crédito requerida
+- ✅ Guardado automático de datos
+
+### Ver Estado de la Licencia
+
+Ir a **🔐 Licencia** en el menú superior para ver:
+- Tipo de licencia actual
+- Días restantes
+- Fecha de expiración
+
+### Activar Licencia Completa
+
+Cuando tu período de prueba expire o desees activar una licencia:
+
+1. **Solicitar un serial** al proveedor
+2. Ir a **🔐 Licencia**
+3. **Pegar el serial** en el campo
+4. Hacer clic en **🔑 Activar**
+5. ✅ ¡Licencia activada!
+
+---
+
+## 📚 Funciones Principales
+
+### 📅 Reservas de Turnos
+- Reservar turnos por día y horario
+- Ver disponibilidad en tiempo real
+- Cancelar y modificar reservas
+- Historial completo de reservas
+
+### 📋 Turnos Fijos
+- Crear turnos que se repiten cada semana
+- Gestionar clientes frecuentes
+- Marcar ausencias temporales
+- Lista completa de turnos fijos activos
+
+### 💰 Gestión Financiera
+- Ver ingresos por día/mes/año
+- Resumen de transacciones
+- Filtrar por fechas
+- Estadísticas de ocupación
+
+### 📊 Reportes
+- Exportar datos a Excel
+- Backup completo del sistema
+- Importar datos desde backup
+- Historial de operaciones
+
+---
+
+## 💾 Backup y Seguridad
+
+### Hacer Backup
+
+1. En la página principal, busca el botón **💾 Backup** (esquina inferior derecha)
+2. Se generará un archivo JSON con todos tus datos
+3. Guardar en lugar seguro (USB, nube, etc.)
+
+### Restaurar desde Backup
+
+1. Hacer clic en **📂 Importar**
+2. Seleccionar el archivo de backup
+3. Confirmar la restauración
+4. ✅ Datos restaurados
+
+**Recomendación**: Hacer backup semanal de tus datos
+
+---
+
+## 🔄 Reinstalación
+
+### En la Misma Computadora
+
+Si necesitas reinstalar la aplicación:
+
+1. Reinstalar normalmente
+2. El sistema **recordará tu tiempo de trial restante**
+3. Si tenías licencia activa, ingresa el mismo serial
+4. ✅ Todo funciona igual
+
+**Nota**: No puedes "resetear" el trial reinstalando. El sistema detecta tu computadora.
+
+### En Otra Computadora
+
+Si cambias de PC:
+
+1. Necesitarás un **nuevo serial** del proveedor
+2. El serial anterior solo funciona en la PC original
+3. Contacta al soporte para obtener un nuevo serial
+
+---
+
+## ❓ Preguntas Frecuentes
+
+### ¿Necesito conexión a Internet?
+
+No, la aplicación funciona **100% offline**. Todos los datos se guardan en tu computadora.
+
+### ¿Puedo usar en múltiples computadoras?
+
+Cada licencia está vinculada a una computadora. Para usar en otra PC, necesitas una licencia adicional.
+
+### ¿Qué pasa si expira el trial?
+
+Puedes activar una licencia completa ingresando un serial válido en la sección "🔐 Licencia".
+
+### ¿Pierdo mis datos al expirar el trial?
+
+No, todos tus datos se mantienen guardados. Solo necesitas activar una licencia para seguir usándolos.
+
+### ¿Puedo personalizar los precios?
+
+Sí, en **⚙️ Configuración** puedes establecer:
+- Precio por turno regular
+- Precio por turno fijo (clientes frecuentes)
+- Descuentos promocionales
+
+### ¿Cómo exporto mis datos?
+
+Usa la función de **Finanzas** para exportar a Excel, o haz un **Backup completo** en formato JSON.
+
+---
+
+## 📞 Soporte y Contacto
+
+### Para Obtener Licencia Completa
+
+Contacta al proveedor para:
+- Obtener seriales de licencia
+- Renovar licencias
+- Cambiar planes (mensual, anual, etc.)
+- Transferir licencia a otra PC
+
+### Problemas Técnicos
+
+Si tienes problemas:
+1. Verificar que no esté bloqueado por antivirus
+2. Ejecutar como administrador (si es necesario)
+3. Contactar al soporte con descripción del problema
+
+---
+
+## 🎯 Requisitos del Sistema
+
+- **Sistema Operativo**: Windows 10 o superior (64 bits)
+- **RAM**: 2 GB mínimo
+- **Espacio en Disco**: 150 MB
+- **Internet**: No requerido
+
+---
+
+## 📝 Notas Importantes
+
+✅ **Datos Locales**: Todos tus datos se guardan en tu computadora
+✅ **Privacidad**: No se envía información a servidores externos
+✅ **Backup**: Recomendamos hacer backup regular de tus datos
+✅ **Actualizar**: Contacta al proveedor para obtener actualizaciones
+
+---
+
+## 🎊 ¡Disfruta tu Prueba Gratuita!
+
+Tienes **15 días completos** para probar todas las funciones sin restricciones.
+
+**¿Preguntas? ¿Necesitas ayuda?**
+Contacta al proveedor del software.
+
+---
+
+**Sistema de Turnos de Pádel v1.0**
+**© 2025 - Todos los derechos reservados**

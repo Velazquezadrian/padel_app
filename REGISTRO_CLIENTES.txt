@@ -1,0 +1,321 @@
+================================================================================
+              📋 REGISTRO DE CLIENTES - GENERADOR DE SERIALES 📋
+================================================================================
+
+VERSIÓN: 2.0
+FECHA: 09/12/2025
+NUEVA FUNCIONALIDAD: Sistema de registro completo de clientes
+
+
+================================================================================
+✨ NUEVAS CARACTERÍSTICAS
+================================================================================
+
+1. REGISTRO COMPLETO DE DATOS
+   ✅ Nombre del cliente
+   ✅ Apellido del cliente
+   ✅ Email o Teléfono de contacto
+   ✅ Tipo de plan adquirido
+   ✅ Fecha de generación del serial
+   ✅ Fecha de expiración
+   ✅ Serial completo generado
+
+2. HISTORIAL AUTOMÁTICO
+   ✅ Todos los clientes se guardan en "registro_clientes.json"
+   ✅ Base de datos local con toda la información
+   ✅ No se pierde ningún registro
+   ✅ Fácil de consultar y exportar
+
+3. BOTÓN VER REGISTROS
+   ✅ Visualiza todos los clientes en una ventana
+   ✅ Tabla organizada con ID, nombre, contacto, plan, etc.
+   ✅ Detalles completos de los últimos 5 clientes
+   ✅ Serial completo de cada cliente
+
+
+================================================================================
+🎯 CÓMO USAR EL NUEVO SISTEMA
+================================================================================
+
+PASO 1: COMPLETAR TODOS LOS CAMPOS
+   📝 Abre GeneradorSeriales.exe
+   
+   Completa la información del cliente:
+   • Nombre: Ej. "Juan"
+   • Apellido: Ej. "Pérez"
+   • Email/Teléfono: Ej. "juan.perez@email.com" o "+54 9 11 1234-5678"
+   
+   Selecciona el plan:
+   • Trial, Mensual, Trimestral, etc.
+
+PASO 2: GENERAR SERIAL
+   🔘 Haz clic en "Generar Serial"
+   
+   ✅ El sistema:
+   • Genera el serial
+   • Guarda el registro automáticamente en "registro_clientes.json"
+   • Limpia los campos para el siguiente cliente
+   • Muestra confirmación con todos los datos
+
+PASO 3: COPIAR Y ENVIAR
+   📋 Usa el botón "Copiar Serial al Portapapeles"
+   📧 Envía el serial al cliente junto con sus datos
+
+PASO 4: VER HISTORIAL (OPCIONAL)
+   📊 Haz clic en "Ver Registros"
+   👁️  Se abre una ventana con:
+   • Tabla resumen de todos los clientes
+   • Detalles completos de los últimos 5
+   • Serials generados
+   • Fechas de expiración
+
+
+================================================================================
+📁 ARCHIVO DE REGISTRO: registro_clientes.json
+================================================================================
+
+UBICACIÓN:
+   C:\Proyectos\Padel\registro_clientes.json
+   (o donde esté el ejecutable GeneradorSeriales.exe)
+
+FORMATO:
+   Archivo JSON con array de objetos, cada uno contiene:
+   {
+     "id": 1,
+     "nombre": "Juan",
+     "apellido": "Pérez",
+     "nombre_completo": "Juan Pérez",
+     "contacto": "juan.perez@email.com",
+     "tipo_plan": "trimestral",
+     "dias": 90,
+     "fecha_generacion": "2025-12-09 12:30:00",
+     "fecha_expiracion": "2026-03-09",
+     "serial": "Z0FBQUFBQnBPRDNF...",
+     "serial_id": "abc123...",
+     "activo": true
+   }
+
+VENTAJAS:
+   ✅ Fácil de leer y editar (si es necesario)
+   ✅ Compatible con Excel/Google Sheets (importación JSON)
+   ✅ Se puede hacer backup simplemente copiando el archivo
+   ✅ Se puede analizar con scripts de Python
+
+
+================================================================================
+📊 EXPORTAR A EXCEL
+================================================================================
+
+Si quieres ver los datos en Excel:
+
+OPCIÓN 1: USAR CONVERSOR ONLINE
+   1. Copia el contenido de "registro_clientes.json"
+   2. Ve a: https://json-csv.com/
+   3. Pega el JSON
+   4. Descarga como CSV
+   5. Abre en Excel
+
+OPCIÓN 2: POWER QUERY (EXCEL 2016+)
+   1. Excel → Datos → Obtener datos → Desde archivo → Desde JSON
+   2. Selecciona "registro_clientes.json"
+   3. Convierte a tabla
+   4. Listo para analizar
+
+OPCIÓN 3: PYTHON SCRIPT (Si sabes Python)
+   import json
+   import pandas as pd
+   
+   with open('registro_clientes.json', 'r') as f:
+       data = json.load(f)
+   
+   df = pd.DataFrame(data)
+   df.to_excel('clientes.xlsx', index=False)
+
+
+================================================================================
+🔍 BÚSQUEDA DE CLIENTES
+================================================================================
+
+Para buscar un cliente específico:
+
+1. ABRIR EL REGISTRO
+   • Haz clic en "Ver Registros"
+   • Usa Ctrl+F para buscar en la ventana
+   • Busca por nombre, email, serial ID, etc.
+
+2. EDITAR EL JSON DIRECTAMENTE
+   • Abre "registro_clientes.json" con Notepad++
+   • Usa Ctrl+F para buscar
+   • Puedes ver todos los detalles
+
+3. VER EN NAVEGADOR
+   • Arrastra "registro_clientes.json" a Chrome/Firefox
+   • Se visualiza formateado y colapsable
+   • Fácil de navegar
+
+
+================================================================================
+💡 CASOS DE USO
+================================================================================
+
+1. CLIENTE QUIERE RENOVAR
+   • Busca su nombre en "Ver Registros"
+   • Verifica su plan anterior
+   • Genera nuevo serial (mismo o diferente plan)
+   • El sistema crea un nuevo registro
+
+2. CLIENTE PERDIÓ SU SERIAL
+   • Busca en "Ver Registros"
+   • Encuentra el serial original
+   • Se lo reenvías
+   • (Recuerda: serials de un solo uso, si ya lo activó necesita uno nuevo)
+
+3. REPORTE DE VENTAS
+   • Abre "registro_clientes.json"
+   • Cuenta cuántos de cada tipo de plan
+   • Analiza las fechas de generación
+   • Calcula ingresos según tus precios
+
+4. SEGUIMIENTO DE EXPIRACIONES
+   • Ordena por "fecha_expiracion"
+   • Identifica clientes próximos a expirar
+   • Contacta proactivamente para renovación
+   • Genera nuevo serial antes de que expire
+
+
+================================================================================
+⚠️  IMPORTANTE - BACKUP DEL REGISTRO
+================================================================================
+
+RECOMENDACIONES:
+
+1. BACKUP SEMANAL
+   • Copia "registro_clientes.json" a otra ubicación
+   • Google Drive, Dropbox, OneDrive, etc.
+   • Nombra con fecha: "registro_clientes_2025-12-09.json"
+
+2. BACKUP AUTOMÁTICO (OPCIONAL)
+   • Configura sincronización con nube
+   • O usa script de backup automático
+   • Programa backup semanal en Windows Task Scheduler
+
+3. NUNCA BORRAR EL ARCHIVO
+   • Es tu base de datos de clientes
+   • Contiene toda la historia de ventas
+   • Si se pierde, pierdes el registro de quién compró
+
+4. COMPARTIR CON CUIDADO
+   • Contiene datos personales de clientes
+   • Contiene serials que pueden usarse
+   • Mantenlo privado y seguro
+
+
+================================================================================
+📈 ESTADÍSTICAS QUE PUEDES OBTENER
+================================================================================
+
+Del archivo "registro_clientes.json" puedes saber:
+
+✅ Total de clientes registrados
+✅ Clientes por tipo de plan (trial, mensual, etc.)
+✅ Ventas por mes/semana/día
+✅ Cliente más antiguo y más reciente
+✅ Promedios de días por plan
+✅ Serials generados por período
+✅ Ingresos proyectados (según tus precios)
+✅ Tasa de renovación (si vuelven a comprar)
+
+
+================================================================================
+🔐 PRIVACIDAD Y SEGURIDAD
+================================================================================
+
+DATOS SENSIBLES:
+   ⚠️  El archivo contiene:
+   • Nombres y apellidos
+   • Emails/teléfonos
+   • Serials válidos
+   
+   🔒 Recomendaciones:
+   • No lo compartas públicamente
+   • No lo subas a GitHub sin cifrar
+   • Haz backup en ubicación segura
+   • Si lo envías, usa ZIP con contraseña
+
+CUMPLIMIENTO LEGAL:
+   Dependiendo de tu país, puede aplicar:
+   • GDPR (Europa)
+   • LGPD (Brasil)
+   • CCPA (California, USA)
+   
+   Buenas prácticas:
+   • Informa a clientes que guardas sus datos
+   • Usa los datos solo para gestión de licencias
+   • Permite a clientes solicitar borrado de datos
+   • Mantén datos seguros y respaldados
+
+
+================================================================================
+🎯 VENTAJAS DEL NUEVO SISTEMA
+================================================================================
+
+ANTES (Sin registro):
+❌ Generabas serial y lo olvidabas
+❌ No sabías quién compró qué
+❌ Cliente perdía serial = problema
+❌ Sin historial de ventas
+❌ Sin seguimiento de renovaciones
+
+AHORA (Con registro):
+✅ Base de datos completa de clientes
+✅ Historial de todas las ventas
+✅ Recuperación fácil de serials
+✅ Seguimiento de expiraciones
+✅ Análisis de ventas y estadísticas
+✅ Contacto directo con clientes
+✅ Renovaciones proactivas
+✅ Reporte profesional de tu negocio
+
+
+================================================================================
+💼 MEJORES PRÁCTICAS
+================================================================================
+
+1. COMPLETAR SIEMPRE TODOS LOS CAMPOS
+   • No dejes campos vacíos
+   • Usa formato consistente para emails/teléfonos
+   • Escribe nombres correctamente (para contacto futuro)
+
+2. VERIFICAR DATOS ANTES DE GENERAR
+   • Confirma con el cliente su email/teléfono
+   • Verifica que elegiste el plan correcto
+   • Una vez generado, queda registrado
+
+3. REVISAR REGISTROS PERIÓDICAMENTE
+   • Cada semana, abre "Ver Registros"
+   • Verifica clientes próximos a expirar
+   • Contacta para ofrecer renovación
+
+4. MANTENER BACKUP ACTUALIZADO
+   • Copia el archivo cada vez que generas varios serials
+   • Guarda en la nube (Google Drive, etc.)
+   • Nunca tendrás pérdida de datos
+
+
+================================================================================
+✨ RESUMEN
+================================================================================
+
+El Generador de Seriales ahora es una herramienta profesional completa:
+
+📝 Registro detallado de cada cliente
+📊 Base de datos automática en JSON
+👁️  Visualización de historial completo
+🔍 Búsqueda y consulta fácil
+📈 Análisis de ventas y estadísticas
+💼 Gestión profesional de tu negocio
+
+¡Ahora tienes control total sobre tus clientes y licencias! 🚀
+
+
+================================================================================
