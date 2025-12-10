@@ -631,21 +631,48 @@ function cerrarModalPersonalizacion() {
 }
 
 // ============================================
+// FUNCIONES DE CONFIGURACIÓN
+// ============================================
+
+function abrirModalConfiguracion() {
+    const modal = document.getElementById('modalConfiguracion');
+    modal.style.display = 'block';
+}
+
+function cerrarModalConfiguracion() {
+    const modal = document.getElementById('modalConfiguracion');
+    modal.style.display = 'none';
+}
+
+// ============================================
 // FUNCIONES DE FINANZAS
 // ============================================
 
+let tipoReporteActual = 'dia';
+
 function abrirModalFinanzas() {
     const modal = document.getElementById('modalFinanzas');
-    const inputFecha = document.getElementById('fechaFinanzas');
     
     // Configurar fecha actual
     const hoy = new Date().toISOString().split('T')[0];
-    inputFecha.value = hoy;
+    document.getElementById('fechaFinanzas').value = hoy;
+    
+    // Configurar semana actual
+    const semana = obtenerSemanaActual();
+    document.getElementById('semanaFinanzas').value = semana;
+    
+    // Configurar mes actual
+    const mes = hoy.substring(0, 7); // YYYY-MM
+    document.getElementById('mesFinanzas').value = mes;
+    
+    // Configurar fechas desde/hasta
+    document.getElementById('fechaDesde').value = hoy;
+    document.getElementById('fechaHasta').value = hoy;
+    
+    // Seleccionar tipo "día" por defecto
+    seleccionarTipoReporte('dia');
     
     modal.style.display = 'block';
-    
-    // Cargar reporte automáticamente
-    cargarReporteFinanzas();
 }
 
 function cerrarModalFinanzas() {
@@ -653,33 +680,160 @@ function cerrarModalFinanzas() {
     modal.style.display = 'none';
 }
 
-async function cargarReporteFinanzas() {
-    const fecha = document.getElementById('fechaFinanzas').value;
+function seleccionarTipoReporte(tipo) {
+    tipoReporteActual = tipo;
     
-    if (!fecha) {
-        alert('Por favor selecciona una fecha');
-        return;
+    // Actualizar botones activos
+    document.querySelectorAll('.btn-tipo-reporte').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-tipo="${tipo}"]`).classList.add('active');
+    
+    // Ocultar todos los selectores
+    document.querySelectorAll('.selector-fechas').forEach(selector => {
+        selector.style.display = 'none';
+    });
+    
+    // Mostrar el selector correspondiente
+    switch(tipo) {
+        case 'dia':
+            document.getElementById('selectorDia').style.display = 'flex';
+            break;
+        case 'varios':
+            document.getElementById('selectorVarios').style.display = 'block';
+            break;
+        case 'semanal':
+            document.getElementById('selectorSemanal').style.display = 'block';
+            break;
+        case 'mensual':
+            document.getElementById('selectorMensual').style.display = 'block';
+            break;
+    }
+    
+    // Ocultar reporte anterior
+    document.getElementById('reporteFinanzas').style.display = 'none';
+}
+
+function obtenerSemanaActual() {
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const primerDia = new Date(año, 0, 1);
+    const dias = Math.floor((hoy - primerDia) / (24 * 60 * 60 * 1000));
+    const semana = Math.ceil((dias + primerDia.getDay() + 1) / 7);
+    return `${año}-W${semana.toString().padStart(2, '0')}`;
+}
+
+async function cargarReporteFinanzas() {
+    let fechas = {};
+    let titulo = '';
+    
+    // Obtener fechas según el tipo de reporte
+    switch(tipoReporteActual) {
+        case 'dia':
+            const fecha = document.getElementById('fechaFinanzas').value;
+            if (!fecha) {
+                alert('Por favor selecciona una fecha');
+                return;
+            }
+            fechas = { fecha_desde: fecha, fecha_hasta: fecha };
+            titulo = `📈 Resumen del ${formatearFecha(fecha)}`;
+            break;
+            
+        case 'varios':
+            const fechaDesde = document.getElementById('fechaDesde').value;
+            const fechaHasta = document.getElementById('fechaHasta').value;
+            if (!fechaDesde || !fechaHasta) {
+                alert('Por favor selecciona ambas fechas');
+                return;
+            }
+            if (fechaDesde > fechaHasta) {
+                alert('La fecha "Desde" no puede ser posterior a la fecha "Hasta"');
+                return;
+            }
+            fechas = { fecha_desde: fechaDesde, fecha_hasta: fechaHasta };
+            titulo = `📈 Resumen del ${formatearFecha(fechaDesde)} al ${formatearFecha(fechaHasta)}`;
+            break;
+            
+        case 'semanal':
+            const semana = document.getElementById('semanaFinanzas').value;
+            if (!semana) {
+                alert('Por favor selecciona una semana');
+                return;
+            }
+            const [año, numSemana] = semana.split('-W');
+            const fechasSemana = obtenerFechasDeSemana(parseInt(año), parseInt(numSemana));
+            fechas = { fecha_desde: fechasSemana.inicio, fecha_hasta: fechasSemana.fin };
+            titulo = `📈 Resumen Semanal (Semana ${numSemana} de ${año})`;
+            break;
+            
+        case 'mensual':
+            const mes = document.getElementById('mesFinanzas').value;
+            if (!mes) {
+                alert('Por favor selecciona un mes');
+                return;
+            }
+            const [añoMes, numMes] = mes.split('-');
+            const fechasMes = obtenerFechasDeMes(parseInt(añoMes), parseInt(numMes));
+            fechas = { fecha_desde: fechasMes.inicio, fecha_hasta: fechasMes.fin };
+            const nombreMes = new Date(añoMes, numMes - 1).toLocaleString('es-AR', { month: 'long', year: 'numeric' });
+            titulo = `📈 Resumen Mensual (${nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1)})`;
+            break;
     }
     
     try {
-        const response = await fetch('/api/finanzas/reporte_diario', {
+        const response = await fetch('/api/finanzas/reporte_rango', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ fecha })
+            body: JSON.stringify(fechas)
         });
         
         const data = await response.json();
         
         if (data.success) {
-            mostrarReporteFinanzas(data);
+            mostrarReporteFinanzas(data, titulo);
         } else {
             alert('❌ ' + data.message);
         }
     } catch (error) {
         alert('Error al cargar reporte: ' + error.message);
     }
+}
+
+function obtenerFechasDeSemana(año, semana) {
+    // Primer día del año
+    const primerDia = new Date(año, 0, 1);
+    // Calcular el lunes de la semana especificada
+    const diasHastaSemana = (semana - 1) * 7;
+    const lunes = new Date(primerDia);
+    lunes.setDate(primerDia.getDate() + diasHastaSemana - primerDia.getDay() + 1);
+    
+    // Domingo de esa semana
+    const domingo = new Date(lunes);
+    domingo.setDate(lunes.getDate() + 6);
+    
+    return {
+        inicio: lunes.toISOString().split('T')[0],
+        fin: domingo.toISOString().split('T')[0]
+    };
+}
+
+function obtenerFechasDeMes(año, mes) {
+    // Primer día del mes
+    const primerDia = new Date(año, mes - 1, 1);
+    // Último día del mes
+    const ultimoDia = new Date(año, mes, 0);
+    
+    return {
+        inicio: primerDia.toISOString().split('T')[0],
+        fin: ultimoDia.toISOString().split('T')[0]
+    };
+}
+
+function formatearFecha(fecha) {
+    const [año, mes, dia] = fecha.split('-');
+    return `${dia}/${mes}/${año}`;
 }
 
 function mostrarReporteFinanzas(data) {

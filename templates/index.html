@@ -12,10 +12,8 @@
             <h1>🎾 Sistema de Reserva de Turnos - Pádel</h1>
             <nav>
                 <button onclick="abrirModalFinanzas()" class="btn-secondary">💰 Finanzas</button>
-                <button onclick="abrirModalPersonalizacion()" class="btn-customize">🎨 Personalizar</button>
                 <button onclick="abrirModalTurnosFijos()" class="btn-secondary">📋 Turnos Fijos</button>
-                <a href="/configuracion" class="btn-secondary">⚙️ Configuración</a>
-                <a href="/licencia" class="btn-secondary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">🔐 Licencia</a>
+                <button onclick="abrirModalConfiguracion()" class="btn-secondary">⚙️ Configuración</button>
             </nav>
             <div id="licenciaInfo" class="licencia-badge" style="display: none;"></div>
         </header>
@@ -178,9 +176,43 @@
             <h2>💰 Reporte Financiero</h2>
             
             <div class="form-group" style="margin-bottom: 25px;">
-                <label for="fechaFinanzas">📅 Seleccionar Fecha:</label>
-                <input type="date" id="fechaFinanzas" name="fechaFinanzas" style="max-width: 250px;">
-                <button onclick="cargarReporteFinanzas()" class="btn-primary" style="margin-left: 15px;">
+                <label style="margin-bottom: 10px; display: block; font-weight: bold;">📊 Tipo de Reporte:</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="seleccionarTipoReporte('dia')" class="btn-tipo-reporte active" data-tipo="dia">📅 Un Día</button>
+                    <button onclick="seleccionarTipoReporte('varios')" class="btn-tipo-reporte" data-tipo="varios">📅 Varios Días</button>
+                    <button onclick="seleccionarTipoReporte('semanal')" class="btn-tipo-reporte" data-tipo="semanal">📆 Semanal</button>
+                    <button onclick="seleccionarTipoReporte('mensual')" class="btn-tipo-reporte" data-tipo="mensual">📆 Mensual</button>
+                </div>
+
+                <div id="selectorDia" class="selector-fechas" style="display: flex; align-items: center; gap: 10px;">
+                    <label for="fechaFinanzas">📅 Fecha:</label>
+                    <input type="date" id="fechaFinanzas" name="fechaFinanzas" style="max-width: 200px;">
+                </div>
+
+                <div id="selectorVarios" class="selector-fechas" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <label for="fechaDesde">📅 Desde:</label>
+                        <input type="date" id="fechaDesde" name="fechaDesde" style="max-width: 200px;">
+                        <label for="fechaHasta" style="margin-left: 15px;">📅 Hasta:</label>
+                        <input type="date" id="fechaHasta" name="fechaHasta" style="max-width: 200px;">
+                    </div>
+                </div>
+
+                <div id="selectorSemanal" class="selector-fechas" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="semanaFinanzas">📆 Semana del año:</label>
+                        <input type="week" id="semanaFinanzas" name="semanaFinanzas" style="max-width: 200px;">
+                    </div>
+                </div>
+
+                <div id="selectorMensual" class="selector-fechas" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="mesFinanzas">📆 Mes:</label>
+                        <input type="month" id="mesFinanzas" name="mesFinanzas" style="max-width: 200px;">
+                    </div>
+                </div>
+
+                <button onclick="cargarReporteFinanzas()" class="btn-primary" style="margin-top: 15px;">
                     📊 Ver Reporte
                 </button>
             </div>
@@ -188,7 +220,7 @@
             <div id="reporteFinanzas" style="display: none;">
                 <!-- Resumen -->
                 <div style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
-                    <h3 style="margin: 0 0 20px 0; font-size: 1.5em;">📈 Resumen del Día</h3>
+                    <h3 style="margin: 0 0 20px 0; font-size: 1.5em;" id="tituloResumen">📈 Resumen del Día</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px;">
                         <div>
                             <div style="font-size: 0.9em; opacity: 0.9;">Total Recaudado</div>
@@ -237,6 +269,64 @@
 
             <div class="form-actions" style="margin-top: 20px;">
                 <button type="button" class="btn-secondary" onclick="cerrarModalFinanzas()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Configuración -->
+    <div id="modalConfiguracion" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close" onclick="cerrarModalConfiguracion()">&times;</span>
+            <h2>⚙️ Configuración</h2>
+            
+            <div style="display: grid; gap: 15px; margin-top: 25px;">
+                <!-- Opción Personalizar -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;" onclick="abrirModalPersonalizacion(); cerrarModalConfiguracion();" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2.5em;">🎨</div>
+                        <div>
+                            <h3 style="margin: 0 0 5px 0;">Personalizar</h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.9em;">Cambia colores, logo y apariencia del sistema</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opción Licencia -->
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;" onclick="window.location.href='/licencia';" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2.5em;">🔐</div>
+                        <div>
+                            <h3 style="margin: 0 0 5px 0;">Licencia</h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.9em;">Ver información de la licencia y activar serials</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opción Configuración General -->
+                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;" onclick="window.location.href='/configuracion';" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2.5em;">⚙️</div>
+                        <div>
+                            <h3 style="margin: 0 0 5px 0;">Configuración General</h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.9em;">Canchas, horarios, precios y configuración del sistema</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opción Backup -->
+                <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 20px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;" onclick="window.location.href='/backup';" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2.5em;">💾</div>
+                        <div>
+                            <h3 style="margin: 0 0 5px 0;">Backup y Restauración</h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.9em;">Exportar e importar datos del sistema</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 25px;">
+                <button type="button" class="btn-secondary" onclick="cerrarModalConfiguracion()">Cerrar</button>
             </div>
         </div>
     </div>

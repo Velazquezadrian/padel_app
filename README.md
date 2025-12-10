@@ -54,44 +54,47 @@ padel-turnos/
 ## 🚀 Inicio Rápido
 
 ### Requisitos
-- Python 3.13+
-- Windows 10/11 (ejecutables compilados para Windows)
+- Python 3.13+ (Windows/macOS)
+- Windows 10/11 o macOS 10.13+
 
 ### Instalación para Desarrollo
 
-1. **Clonar repositorio**
+**Windows:**
 ```bash
 git clone https://github.com/Velazquezadrian/padel_app.git
 cd padel_app
-```
-
-2. **Crear entorno virtual**
-```bash
 python -m venv venv
 venv\Scripts\activate
-```
-
-3. **Instalar dependencias**
-```bash
 pip install -r requirements.txt
-```
-
-4. **Configurar aplicación**
-```bash
 copy config.example.json config.json
-```
-
-5. **Ejecutar aplicación**
-```bash
 python app_escritorio.py
 ```
 
+**macOS:**
+```bash
+git clone https://github.com/Velazquezadrian/padel_app.git
+cd padel_app
+chmod +x setup_mac.sh
+./setup_mac.sh
+python3 app_escritorio.py
+```
+
+📖 **Guía completa para macOS:** [README_macOS.md](README_macOS.md)
+
 ### Uso de Ejecutables (Cliente)
 
-1. Descargar `SistemaTurnosPadel_v1.0_Portable.zip`
+**Windows:**
+1. Descargar `Cliente_SistemaTurnosPadel_v2.0.zip`
 2. Extraer en cualquier carpeta
 3. Ejecutar `SistemaTurnosPadel.exe`
 4. Ingresar serial de licencia (o usar trial de 15 días)
+
+**macOS:**
+1. Descargar `Cliente_SistemaTurnosPadel_v2.0_macOS.dmg`
+2. Abrir el DMG y arrastrar a Aplicaciones
+3. Ejecutar `SistemaTurnosPadel.app`
+4. Si aparece advertencia de seguridad: Sistema > Seguridad > Abrir de todas formas
+5. Ingresar serial de licencia (o usar trial de 15 días)
 
 ## 🔑 Sistema de Licencias
 
@@ -126,14 +129,14 @@ python app_escritorio.py
 
 ## 📦 Compilación de Ejecutables
 
-### Aplicación Principal
+### Windows
 
+**Aplicación Principal:**
 ```bash
 pyinstaller SistemaTurnosPadel.spec
 ```
 
-### Generador de Seriales
-
+**Generador de Seriales:**
 ```bash
 pyinstaller --onefile --windowed --name="GeneradorSeriales" ^
             --icon="icono_padel.ico" ^
@@ -142,6 +145,27 @@ pyinstaller --onefile --windowed --name="GeneradorSeriales" ^
             --hidden-import=json ^
             generador_seriales_gui.py
 ```
+
+### macOS
+
+**Script automático (recomendado):**
+```bash
+./build_mac.sh
+```
+
+**Manual:**
+```bash
+pyinstaller --clean --noconfirm \
+    --name="SistemaTurnosPadel" \
+    --windowed \
+    --icon="icono_padel.icns" \
+    --add-data="templates:templates" \
+    --add-data="static:static" \
+    --osx-bundle-identifier=com.padel.turnos \
+    app_escritorio.py
+```
+
+📖 **Más detalles:** Ver [README_macOS.md](README_macOS.md) para compilación completa en Mac
 
 ## 🔧 Configuración
 

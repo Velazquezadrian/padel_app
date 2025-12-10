@@ -3,3 +3,7 @@ Werkzeug==3.0.1
 pywebview==5.1
 openpyxl==3.1.2
 cryptography==41.0.7
+
+# Mac-specific dependencies (automatically installed on macOS)
+# pyobjc-framework-Cocoa  # PyWebView on macOS
+# pyobjc-framework-WebKit # PyWebView on macOS

@@ -1,0 +1,190 @@
+================================================================================
+                    PAQUETES DE DISTRIBUCIÓN v2.0
+                      Sistema de Turnos de Pádel
+================================================================================
+
+📦 CONTENIDO DE ESTE DIRECTORIO
+-------------------------------
+
+Este directorio contiene los paquetes listos para distribuir:
+
+
+1. Admin_GeneradorSeriales_v2.0.zip (12.56 MB)
+   ═══════════════════════════════════════════════════════════════
+   
+   👤 PARA: ADMINISTRADOR (TÚ)
+   
+   📝 DESCRIPCIÓN:
+   Herramienta para generar serials de licencia con interfaz gráfica.
+   
+   📂 CONTIENE:
+   • GeneradorSeriales.exe         - Aplicación generadora
+   • INSTRUCCIONES_ADMIN.txt       - Manual de uso
+   • REGISTRO_CLIENTES.txt         - Documentación del registro
+   
+   ⚠️  IMPORTANTE: 
+   NO distribuir a clientes. Solo para uso administrativo.
+
+
+2. Cliente_SistemaTurnosPadel_v2.0.zip (15.09 MB)
+   ═══════════════════════════════════════════════════════════════
+   
+   👥 PARA: CLIENTES (USUARIOS FINALES)
+   
+   📝 DESCRIPCIÓN:
+   Sistema completo de gestión de turnos de pádel portable.
+   
+   📂 CONTIENE:
+   • SistemaTurnosPadel.exe        - Aplicación principal
+   • _internal/                    - Dependencias necesarias
+   • LEEME_CLIENTE.txt             - Instrucciones de uso
+   • INICIO_RAPIDO.txt             - Guía rápida
+   
+   ✅ LISTO PARA:
+   Enviar por email, Google Drive, Dropbox, WeTransfer, USB, etc.
+
+
+================================================================================
+🚀 CÓMO DISTRIBUIR A CLIENTES
+================================================================================
+
+PASO 1: SUBIR EL ZIP A LA NUBE
+   • Google Drive → Compartir → Copiar link
+   • Dropbox → Share → Copy link
+   • WeTransfer → Send → Get download link
+   
+PASO 2: GENERAR SERIAL
+   • Descomprimir Admin_GeneradorSeriales_v2.0.zip
+   • Ejecutar GeneradorSeriales.exe
+   • Completar datos del cliente
+   • Seleccionar plan
+   • Copiar serial generado
+
+PASO 3: ENVIAR AL CLIENTE
+   Mensaje sugerido:
+   ───────────────────────────────────────────────────────────────
+   Hola [NOMBRE],
+   
+   Te envío el sistema de gestión de turnos de pádel:
+   
+   📥 Descarga: [LINK AL ZIP]
+   
+   🔑 Tu serial de licencia [PLAN]:
+   [SERIAL AQUÍ]
+   
+   📖 Instrucciones:
+   1. Descargar y extraer el ZIP
+   2. Ejecutar SistemaTurnosPadel.exe
+   3. Pegar el serial cuando lo solicite
+   4. ¡Listo para usar!
+   
+   Cualquier duda, estoy para ayudarte.
+   
+   Saludos!
+   ───────────────────────────────────────────────────────────────
+
+
+================================================================================
+📊 INFORMACIÓN TÉCNICA
+================================================================================
+
+VERSIÓN: 2.0
+FECHA DE COMPILACIÓN: 09/12/2025
+SISTEMA OPERATIVO: Windows 10/11 (64-bit)
+TAMAÑO TOTAL: 27.65 MB
+
+TECNOLOGÍAS:
+• Python 3.13
+• Flask 3.0.0
+• PyWebView 5.1
+• Cryptography 41.0.7
+• Tkinter (GUI)
+
+CARACTERÍSTICAS:
+✅ Sistema de turnos completo
+✅ Gestión de clientes
+✅ Múltiples canchas
+✅ Licencias offline con hardware binding
+✅ Trial de 15 días
+✅ 6 tipos de planes
+✅ Backup/Restore
+✅ Reportes PDF
+
+
+================================================================================
+🔐 SISTEMA DE LICENCIAS
+================================================================================
+
+PLANES DISPONIBLES:
+┌─────────────┬──────────┬──────────────────────┐
+│    Plan     │   Días   │    Uso Recomendado   │
+├─────────────┼──────────┼──────────────────────┤
+│   Trial     │    15    │   Prueba gratuita    │
+│  Mensual    │    30    │   Suscripción básica │
+│ Trimestral  │    90    │   Plan económico     │
+│ Semestral   │   180    │   Plan semestral     │
+│   Anual     │   365    │   Mejor descuento    │
+│ Personaliz. │ Variable │   A medida           │
+└─────────────┴──────────┴──────────────────────┘
+
+SEGURIDAD:
+• Hardware Binding: Licencia ligada al equipo del cliente
+• Single-Use: Cada serial solo puede usarse UNA vez
+• Trial Persistence: Control de períodos de prueba
+• Offline: Sin necesidad de internet
+
+
+================================================================================
+💼 GESTIÓN DE CLIENTES
+================================================================================
+
+El generador crea automáticamente un archivo "registro_clientes.json"
+que guarda toda la información:
+
+• Nombre y apellido del cliente
+• Email o teléfono de contacto
+• Tipo de plan adquirido
+• Fecha de generación del serial
+• Fecha de expiración
+• Serial completo
+
+VENTAJAS:
+✅ Base de datos de clientes
+✅ Historial de todas las ventas
+✅ Seguimiento de expiraciones
+✅ Recuperación de serials perdidos
+✅ Análisis de ventas
+
+⚠️  IMPORTANTE: Hacer backup regular de "registro_clientes.json"
+
+
+================================================================================
+📮 SOPORTE Y ACTUALIZACIONES
+================================================================================
+
+REPOSITORIO GITHUB:
+https://github.com/Velazquezadrian/padel_app
+
+VERSIÓN ACTUAL: v2.0
+
+PARA ACTUALIZACIONES:
+• Descargar nueva release desde GitHub
+• Recompilar con PyInstaller
+• Mantener compatibilidad con serials antiguos
+
+
+================================================================================
+✨ NOTAS FINALES
+================================================================================
+
+• Los ZIPs son portables (no requieren instalación)
+• No incluir archivos de datos del admin en distribución cliente
+• Mantener respaldo del generador y registro de clientes
+• Los serials no caducan hasta que son activados
+• Un serial puede usarse solo una vez
+• Cada cliente necesita su propio serial
+
+¡Éxito con tu emprendimiento! 🚀
+
+
+================================================================================
