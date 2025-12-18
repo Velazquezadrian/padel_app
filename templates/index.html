@@ -15,7 +15,6 @@
                 <button onclick="abrirModalTurnosFijos()" class="btn-secondary">📋 Turnos Fijos</button>
                 <button onclick="abrirModalConfiguracion()" class="btn-secondary">⚙️ Configuración</button>
             </nav>
-            <div id="licenciaInfo" class="licencia-badge" style="display: none;"></div>
         </header>
 
         <main>
@@ -99,26 +98,50 @@
     <div id="modalProductos" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <span class="close" onclick="cerrarModalProductos()">&times;</span>
-            <h2>🛒 Agregar Productos</h2>
-            <form id="formProductos">
-                <div class="form-group">
-                    <label for="productosExtrasModal">Descripción de productos:</label>
-                    <textarea id="productosExtrasModal" name="productosExtrasModal" rows="3" placeholder="Ej: 2 aguas ($500 c/u), 1 grip ($1500)" required></textarea>
-                    <small>Describe los productos que compró el cliente</small>
+            <h2 style="font-size: 18px; margin-bottom: 12px;">🛒 Agregar Productos</h2>
+            
+            <div class="reserva-info" id="infoProductosReserva" style="margin-bottom: 12px; font-size: 13px;">
+                <!-- Info de la reserva -->
+            </div>
+            
+            <!-- Lista de productos agregados -->
+            <div id="listaProductosAgregados" style="margin-bottom: 12px;">
+                <!-- Productos se muestran aquí -->
+            </div>
+            
+            <!-- Formulario para agregar nuevo producto -->
+            <div style="background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                <h3 style="margin: 0 0 10px 0; font-size: 14px;">➕ Nuevo Producto</h3>
+                <div style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 2; min-width: 150px;">
+                        <label for="nombreProducto" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 12px;">Producto:</label>
+                        <input type="text" id="nombreProducto" placeholder="Ej: Agua mineral" 
+                               onkeypress="if(event.key==='Enter'){event.preventDefault();document.getElementById('precioProducto').focus();}"
+                               style="width: 100%; padding: 8px; border: 2px solid var(--border-color); border-radius: 5px; font-size: 13px;">
+                    </div>
+                    <div style="flex: 1; min-width: 100px;">
+                        <label for="precioProducto" style="display: block; margin-bottom: 4px; font-weight: bold; font-size: 12px;">💵 Precio:</label>
+                        <input type="number" id="precioProducto" placeholder="0" min="0" step="50"
+                               onkeypress="if(event.key==='Enter'){event.preventDefault();agregarProductoALista();}"
+                               style="width: 100%; padding: 8px; border: 2px solid var(--border-color); border-radius: 5px; font-size: 13px;">
+                    </div>
+                    <button type="button" onclick="agregarProductoALista()" class="btn-primary" 
+                            style="padding: 8px 16px; white-space: nowrap; font-size: 13px;">
+                        ➕
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="precioExtrasModal">💵 Precio Total:</label>
-                    <input type="number" id="precioExtrasModal" name="precioExtrasModal" min="0" step="100" placeholder="0" required>
-                    <small>Monto total de los productos</small>
-                </div>
-                <div class="reserva-info" id="infoProductosReserva">
-                    <!-- Info de la reserva -->
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">✅ Guardar Productos</button>
-                    <button type="button" class="btn-secondary" onclick="cerrarModalProductos()">❌ Cancelar</button>
-                </div>
-            </form>
+            </div>
+            
+            <!-- Total -->
+            <div style="background: var(--success-color); color: white; padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center;">
+                <h3 style="margin: 0; font-size: 16px;">💰 Total: $<span id="totalProductos">0</span></h3>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="form-actions" style="gap: 8px;">
+                <button type="button" onclick="guardarTodosLosProductos()" class="btn-primary" style="padding: 10px 16px; font-size: 14px;">✅ Guardar</button>
+                <button type="button" class="btn-secondary" onclick="cerrarModalProductos()" style="padding: 10px 16px; font-size: 14px;">❌ Cancelar</button>
+            </div>
         </div>
     </div>
 
@@ -160,6 +183,30 @@
                     </div>
                     <div class="theme-name">Noche Morada</div>
                     <div class="theme-description">Elegante y moderno</div>
+                </div>
+            </div>
+
+            <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--border-color);">
+            
+            <p style="margin-bottom: 20px; color: var(--text-light);">📐 Tamaño de la interfaz:</p>
+            
+            <div class="size-options" style="display: flex; gap: 15px; justify-content: center;">
+                <div class="size-card" data-size="compacto" onclick="cambiarTamano('compacto')">
+                    <div class="size-icon" style="font-size: 24px;">📱</div>
+                    <div class="size-name">Compacto</div>
+                    <div class="size-description">Más espacio</div>
+                </div>
+
+                <div class="size-card" data-size="normal" onclick="cambiarTamano('normal')">
+                    <div class="size-icon" style="font-size: 32px;">💻</div>
+                    <div class="size-name">Normal</div>
+                    <div class="size-description">Balanceado</div>
+                </div>
+
+                <div class="size-card" data-size="grande" onclick="cambiarTamano('grande')">
+                    <div class="size-icon" style="font-size: 40px;">🖥️</div>
+                    <div class="size-name">Grande</div>
+                    <div class="size-description">Más legible</div>
                 </div>
             </div>
 
@@ -366,6 +413,26 @@
             <span class="backup-icon">📥</span>
             <span class="backup-text">Importar</span>
         </button>
+    </div>
+
+    <!-- Badge de licencia temporal (10 segundos) -->
+    <div id="badgeLicencia" class="badge-licencia">
+        <span>🔑</span> <span id="licenciaInfo">Cargando licencia...</span>
+    </div>
+
+    <!-- Footer con derechos reservados (permanente) -->
+    <div class="footer-info">
+        <div class="footer-content">
+            <div class="footer-section">
+                <strong>© Porta Informática - Todos los derechos reservados</strong>
+            </div>
+            <div class="footer-section">
+                <span>📞</span> <a href="tel:+543416715026">341 671-5026</a>
+            </div>
+            <div class="footer-section">
+                <span>📍</span> San Martín 1688, Rosario, Santa Fe
+            </div>
+        </div>
     </div>
 
     <script>

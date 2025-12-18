@@ -1,4 +1,15 @@
-from flask import Flask, render_template, request, jsonify, session, send_file
+# ================================================================================
+# SISTEMA DE TURNOS DE PADEL - BACKEND (Flask)
+# ================================================================================
+# Este archivo contiene toda la lógica del servidor:
+# - API REST con 19 endpoints
+# - Gestión de reservas (puntuales y fijos)
+# - Sistema de finanzas y reportes
+# - Backup/Restore de datos
+# - Integración con sistema de licencias
+# ================================================================================
+
+from flask import Flask, render_template, request, jsonify, send_file
 from datetime import datetime, timedelta
 import json
 import os
@@ -6,125 +17,175 @@ import sys
 from io import BytesIO
 from licencia_manager import LicenciaManager
 
-# Detectar si estamos ejecutando desde PyInstaller
+# ================================================================================
+# CONFIGURACIÓN DE RUTAS Y DIRECTORIOS
+# ================================================================================
+# Detecta si estamos en modo desarrollo o ejecutable empaquetado (PyInstaller)
+
 if getattr(sys, 'frozen', False):
-    # Ejecutable empaquetado
-    application_path = sys._MEIPASS
-    # Usar carpeta de datos del usuario
-    data_path = os.path.join(os.environ['APPDATA'], 'PadelApp')
+    # MODO EJECUTABLE: Rutas para versión empaquetada con PyInstaller
+    application_path = sys._MEIPASS  # Carpeta temporal donde PyInstaller extrae archivos
+    data_path = os.path.join(os.environ['APPDATA'], 'PadelApp')  # Datos persistentes en AppData
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 else:
-    # Modo desarrollo
+    # MODO DESARROLLO: Usa carpeta del proyecto
     application_path = os.path.dirname(os.path.abspath(__file__))
     data_path = application_path
+
+# ================================================================================
+# INICIALIZACIÓN DE FLASK
+# ================================================================================
 
 app = Flask(__name__, 
             template_folder=os.path.join(application_path, 'templates'),
             static_folder=os.path.join(application_path, 'static'))
 app.secret_key = 'tu_clave_secreta_aqui_cambiar_en_produccion'
 
-# Archivos para guardar configuración (en carpeta de datos del usuario)
-CONFIG_FILE = os.path.join(data_path, 'config.json')
-RESERVAS_FILE = os.path.join(data_path, 'reservas.json')
-TURNOS_FIJOS_FILE = os.path.join(data_path, 'turnos_fijos.json')
-AUSENCIAS_FILE = os.path.join(data_path, 'ausencias.json')
-TEMA_FILE = os.path.join(data_path, 'tema.json')
+# ================================================================================
+# RUTAS DE ARCHIVOS JSON (Base de datos persistente)
+# ================================================================================
+
+CONFIG_FILE = os.path.join(data_path, 'config.json')          # Configuración del sistema
+RESERVAS_FILE = os.path.join(data_path, 'reservas.json')      # Reservas puntuales
+TURNOS_FIJOS_FILE = os.path.join(data_path, 'turnos_fijos.json')  # Turnos recurrentes
+AUSENCIAS_FILE = os.path.join(data_path, 'ausencias.json')    # Ausencias de turnos fijos
+TEMA_FILE = os.path.join(data_path, 'tema.json')              # Tema visual seleccionado
+
+# ================================================================================
+# FUNCIONES DE PERSISTENCIA - Cargar/Guardar datos en JSON
+# ================================================================================
 
 def cargar_config():
-    """Carga la configuración del sistema"""
+    """
+    Carga la configuración del sistema desde config.json
+    Retorna configuración por defecto si el archivo no existe
+    """
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
-    # Configuración por defecto
+    
+    # Configuración por defecto al iniciar por primera vez
     return {
         'cantidad_canchas': 2,
         'horario_inicio': '08:00',
         'horario_fin': '22:00',
-        'duracion_turno': 90,  # minutos
-        'precio_turno_regular': 10000,  # Precio por turno normal
-        'precio_turno_fijo': 9000,  # Precio por turno fijo (puede ser menor)
-        'descuento_promocion': 0  # Porcentaje de descuento (0-100)
+        'duracion_turno': 90,
+        'precio_turno_regular': 10000,
+        'precio_turno_fijo': 9000,
+        'descuento_promocion': 0
     }
 
 def guardar_config(config):
-    """Guarda la configuración del sistema"""
+    """Guarda la configuración del sistema en config.json"""
     with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=4)
 
 def cargar_reservas():
-    """Carga las reservas existentes"""
+    """
+    Carga todas las reservas puntuales desde reservas.json
+    Formato: { "fecha_hora": { "cancha_id": { datos_reserva } } }
+    """
     if os.path.exists(RESERVAS_FILE):
         with open(RESERVAS_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {}
 
 def guardar_reservas(reservas):
-    """Guarda las reservas"""
+    """Guarda todas las reservas puntuales en reservas.json"""
     with open(RESERVAS_FILE, 'w', encoding='utf-8') as f:
         json.dump(reservas, f, indent=4)
 
 def cargar_turnos_fijos():
-    """Carga los turnos fijos/recurrentes"""
+    """
+    Carga los turnos fijos/recurrentes desde turnos_fijos.json
+    Los turnos fijos se repiten todas las semanas en el mismo día/horario
+    """
     if os.path.exists(TURNOS_FIJOS_FILE):
         with open(TURNOS_FIJOS_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return []
 
 def guardar_turnos_fijos(turnos_fijos):
-    """Guarda los turnos fijos"""
+    """Guarda los turnos fijos en turnos_fijos.json"""
     with open(TURNOS_FIJOS_FILE, 'w', encoding='utf-8') as f:
         json.dump(turnos_fijos, f, indent=4)
 
 def cargar_ausencias():
-    """Carga las ausencias de turnos fijos"""
+    """
+    Carga las ausencias de turnos fijos desde ausencias.json
+    Las ausencias permiten "liberar" un turno fijo en una fecha específica
+    """
     if os.path.exists(AUSENCIAS_FILE):
         with open(AUSENCIAS_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return []
 
 def guardar_ausencias(ausencias):
-    """Guarda las ausencias"""
+    """Guarda las ausencias en ausencias.json"""
     with open(AUSENCIAS_FILE, 'w', encoding='utf-8') as f:
         json.dump(ausencias, f, indent=4)
 
 def cargar_tema():
-    """Carga el tema seleccionado por el usuario"""
+    """Carga el tema visual seleccionado por el usuario desde tema.json"""
     if os.path.exists(TEMA_FILE):
         with open(TEMA_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
-    return {'tema': 'clasico'}
+    return {'tema': 'clasico', 'tamano': 'normal'}
 
-def guardar_tema(tema):
-    """Guarda el tema seleccionado por el usuario"""
+def guardar_tema(tema, tamano=None):
+    """Guarda el tema visual y/o tamaño en tema.json"""
+    # Cargar configuración existente
+    config = cargar_tema()
+    
+    # Actualizar tema si se proporciona
+    if tema:
+        config['tema'] = tema
+    
+    # Actualizar tamaño si se proporciona
+    if tamano:
+        config['tamano'] = tamano
+    
+    # Guardar
     with open(TEMA_FILE, 'w', encoding='utf-8') as f:
-        json.dump({'tema': tema}, f, indent=4)
+        json.dump(config, f, indent=4)
+
+# ================================================================================
+# FUNCIONES HELPER - Lógica de negocio reutilizable
+# ================================================================================
 
 def aplicar_turnos_fijos(fecha, horario, canchas):
-    """Aplica turnos fijos a la disponibilidad de canchas"""
+    """
+    Aplica los turnos fijos recurrentes a la disponibilidad de canchas
+    
+    Busca turnos fijos que coincidan con el día de la semana y horario,
+    y marca las canchas correspondientes como ocupadas.
+    También verifica si hay ausencias marcadas para ese día específico.
+    """
     turnos_fijos = cargar_turnos_fijos()
     ausencias = cargar_ausencias()
     fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
     dia_semana = fecha_obj.weekday()  # 0=Lunes, 6=Domingo
     
+    # Recorrer todos los turnos fijos configurados
     for turno in turnos_fijos:
         if turno['dia_semana'] == dia_semana and turno['horario'] == horario:
-            # Verificar si hay una ausencia para esta fecha
+            # Verificar si hay una ausencia marcada para esta fecha específica
             clave_ausencia = f"{fecha}_{horario}_{turno['cancha_id']}"
             tiene_ausencia = any(a['clave'] == clave_ausencia for a in ausencias)
             
-            # Buscar la cancha y marcarla como ocupada por el turno fijo
+            # Buscar la cancha correspondiente y actualizar su estado
             for cancha in canchas:
                 if cancha['id'] == turno['cancha_id']:
                     if tiene_ausencia:
-                        # Mantener disponible pero indicar que es turno fijo con ausencia
+                        # Ausencia marcada: cancha disponible pero muestra info del turno fijo
                         cancha['turno_fijo_ausente'] = {
                             'nombre': turno['nombre_cliente'],
                             'telefono': turno.get('telefono_cliente', ''),
                             'id_turno_fijo': turno['id']
                         }
                     else:
-                        # Ocupada por turno fijo normal
+                        # Sin ausencia: cancha ocupada por turno fijo
                         cancha['disponible'] = False
                         cancha['reserva'] = {
                             'nombre': turno['nombre_cliente'],
@@ -137,7 +198,12 @@ def aplicar_turnos_fijos(fecha, horario, canchas):
     return canchas
 
 def generar_horarios(hora_inicio, hora_fin, duracion):
-    """Genera lista de horarios disponibles"""
+    """
+    Genera lista de horarios disponibles entre hora_inicio y hora_fin
+    
+    Ejemplo: inicio='08:00', fin='22:00', duracion=90
+    Resultado: ['08:00', '09:30', '11:00', '12:30', ...]
+    """
     horarios = []
     inicio = datetime.strptime(hora_inicio, '%H:%M')
     fin = datetime.strptime(hora_fin, '%H:%M')
@@ -480,7 +546,10 @@ def cancelar_ausencia():
 
 @app.route('/api/agregar_productos', methods=['POST'])
 def api_agregar_productos():
-    """API para agregar productos extras a una reserva existente"""
+    """
+    API para agregar productos extras a una reserva existente
+    Ahora maneja una lista de productos con nombre y precio individual
+    """
     try:
         data = request.get_json()
         fecha = data['fecha']
@@ -488,14 +557,20 @@ def api_agregar_productos():
         cancha_id = data['cancha_id']
         es_fijo = data.get('es_fijo', False)
         id_turno_fijo = data.get('id_turno_fijo', None)
-        productos_extras = data.get('productos_extras', '')
-        precio_extras = float(data.get('precio_extras', 0))
+        productos_lista = data.get('productos_lista', [])
+        
+        # Calcular precio total
+        precio_extras = sum(p['precio'] for p in productos_lista)
+        
+        # Generar descripción de productos (para compatibilidad)
+        productos_extras = ', '.join([f"{p['nombre']} (${p['precio']})" for p in productos_lista])
         
         if es_fijo and id_turno_fijo:
             # Actualizar turno fijo
             turnos_fijos = cargar_turnos_fijos()
             for turno in turnos_fijos:
                 if turno['id'] == id_turno_fijo:
+                    turno['productos_lista'] = productos_lista
                     turno['productos_extras'] = productos_extras
                     turno['precio_extras'] = precio_extras
                     break
@@ -506,6 +581,7 @@ def api_agregar_productos():
             clave_fecha_hora = f"{fecha}_{horario}"
             
             if clave_fecha_hora in reservas and cancha_id in reservas[clave_fecha_hora]:
+                reservas[clave_fecha_hora][cancha_id]['productos_lista'] = productos_lista
                 reservas[clave_fecha_hora][cancha_id]['productos_extras'] = productos_extras
                 reservas[clave_fecha_hora][cancha_id]['precio_extras'] = precio_extras
                 guardar_reservas(reservas)
@@ -531,17 +607,38 @@ def api_guardar_tema():
         if tema not in temas_validos:
             return jsonify({'success': False, 'message': 'Tema no válido'}), 400
         
-        guardar_tema(tema)
+        guardar_tema(tema, None)
         return jsonify({'success': True, 'tema': tema})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
 @app.route('/api/obtener_tema', methods=['GET'])
 def api_obtener_tema():
-    """Obtiene el tema actual"""
+    """Obtiene el tema actual y tamaño"""
     try:
         tema_data = cargar_tema()
-        return jsonify({'success': True, 'tema': tema_data.get('tema', 'clasico')})
+        return jsonify({
+            'success': True, 
+            'tema': tema_data.get('tema', 'clasico'),
+            'tamano': tema_data.get('tamano', 'normal')
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/guardar_tamano', methods=['POST'])
+def api_guardar_tamano():
+    """Guarda el tamaño de interfaz seleccionado"""
+    try:
+        data = request.get_json()
+        tamano = data.get('tamano', 'normal')
+        
+        # Validar que el tamaño es válido
+        tamanos_validos = ['compacto', 'normal', 'grande']
+        if tamano not in tamanos_validos:
+            return jsonify({'success': False, 'message': 'Tamaño no válido'}), 400
+        
+        guardar_tema(None, tamano)
+        return jsonify({'success': True, 'tamano': tamano})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 

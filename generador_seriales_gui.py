@@ -11,6 +11,7 @@ import sys
 import os
 import json
 from datetime import datetime, timedelta
+import traceback
 
 # Agregar path para imports
 if getattr(sys, 'frozen', False):
@@ -290,14 +291,22 @@ class GeneradorSerialesGUI:
     
     def guardar_registro(self, nombre, apellido, contacto, tipo, dias, serial, datos):
         """Guarda el registro del cliente y serial en un archivo JSON"""
-        archivo_registro = "registro_clientes.json"
-        
-        # Cargar registros existentes
+        archivo_registro = os.path.join(base_path, "registro_clientes.json")
+
+        # Cargar registros existentes (manejar archivo vacío o corrupto)
+        registros = []
         if os.path.exists(archivo_registro):
-            with open(archivo_registro, 'r', encoding='utf-8') as f:
-                registros = json.load(f)
-        else:
-            registros = []
+            try:
+                with open(archivo_registro, 'r', encoding='utf-8') as f:
+                    registros = json.load(f)
+                    if not isinstance(registros, list):
+                        registros = []
+            except json.JSONDecodeError:
+                # Archivo vacío o contenido inválido -> reiniciar registros
+                registros = []
+            except Exception as e:
+                messagebox.showerror("Error al leer registros", f"No se pudo leer el archivo de registros:\n{str(e)}")
+                registros = []
         
         # Crear nuevo registro
         fecha_generacion = datetime.now()
@@ -433,7 +442,21 @@ IMPORTANTE:
             )
             
         except Exception as e:
-            messagebox.showerror("Error", f"Error al generar serial:\n{str(e)}")
+            # Guardar traceback en archivo de log para diagnóstico
+            try:
+                log_path = os.path.join(base_path, 'error_log.txt')
+                with open(log_path, 'a', encoding='utf-8') as logf:
+                    logf.write(f"[{datetime.now().isoformat()}] Error al generar serial:\n")
+                    logf.write(traceback.format_exc())
+                    logf.write("\n\n")
+            except:
+                pass
+
+            # Mostrar mensaje más amigable al usuario
+            messagebox.showerror(
+                "Error",
+                f"Error al generar serial:\n{str(e)}\n\nSe registró el detalle en 'error_log.txt' (carpeta de la app)."
+            )
     
     def copiar_serial(self):
         if not self.serial_actual:
@@ -448,15 +471,19 @@ IMPORTANTE:
     
     def ver_registros(self):
         """Abre una ventana con el historial de clientes"""
-        archivo_registro = "registro_clientes.json"
-        
+        archivo_registro = os.path.join(base_path, "registro_clientes.json")
+
         if not os.path.exists(archivo_registro):
             messagebox.showinfo("Registros", "Aun no hay clientes registrados")
             return
-        
-        # Cargar registros
-        with open(archivo_registro, 'r', encoding='utf-8') as f:
-            registros = json.load(f)
+
+        # Cargar registros con manejo de errores
+        try:
+            with open(archivo_registro, 'r', encoding='utf-8') as f:
+                registros = json.load(f)
+        except Exception as e:
+            messagebox.showerror("Error al leer registros", f"No se pudo leer el archivo de registros:\n{str(e)}")
+            return
         
         if not registros:
             messagebox.showinfo("Registros", "Aun no hay clientes registrados")

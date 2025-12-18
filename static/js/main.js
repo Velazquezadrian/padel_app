@@ -1,4 +1,4 @@
-// Variables globales
+﻿// Variables globales
 let horarioSeleccionado = null;
 let canchaSeleccionada = null;
 let fechaSeleccionada = null;
@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar tema guardado
     cargarTemaGuardado();
     
-    // Verificar licencia
-    verificarLicencia();
+    // Cargar información del footer y badge de licencia
+    cargarInfoFooter();
     
     // Configurar fecha actual
     const inputFecha = document.getElementById('fecha');
@@ -84,6 +84,52 @@ async function actualizarTodosSemaforos() {
             console.error('Error cargando semáforo:', error);
         }
     }
+}
+
+function generarVistaProductosCancha(reserva) {
+    // Función helper para mostrar productos en la tarjeta de cancha (versión compacta)
+    if (!reserva.productos_lista || reserva.productos_lista.length === 0) {
+        return '';
+    }
+    
+    const cantidadProductos = reserva.productos_lista.length;
+    const mostrarDetalle = cantidadProductos <= 2; // Solo mostrar detalle si hay 2 o menos productos
+    
+    let html = `
+        <div style="background-color: #e7f6f8; padding: 8px 10px; border-radius: 6px; margin: 6px 0; 
+                    border-left: 3px solid #17a2b8; font-size: 0.85em;">
+    `;
+    
+    if (mostrarDetalle) {
+        // Mostrar lista completa si hay pocos productos
+        reserva.productos_lista.forEach(producto => {
+            html += `
+                <div style="display: flex; justify-content: space-between; color: #0c5460; line-height: 1.3;">
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px;">🛒 ${producto.nombre}</span>
+                    <span style="font-weight: bold; white-space: nowrap;">$${producto.precio.toLocaleString('es-AR')}</span>
+                </div>
+            `;
+        });
+    } else {
+        // Mostrar solo resumen compacto si hay muchos productos
+        html += `
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #0c5460;">
+                <span style="font-weight: 600;">🛒 ${cantidadProductos} productos</span>
+            </div>
+        `;
+    }
+    
+    // Total siempre visible pero más compacto
+    html += `
+        <div style="display: flex; justify-content: space-between; font-weight: bold; 
+                    color: #17a2b8; margin-top: 4px; padding-top: 4px; border-top: 1px solid #17a2b8;">
+            <span style="font-size: 0.9em;">Total extras:</span>
+            <span>$${reserva.precio_extras.toLocaleString('es-AR')}</span>
+        </div>
+    </div>
+    `;
+    
+    return html;
 }
 
 function actualizarSemaforoHorario(horario, canchas, boton) {
@@ -163,10 +209,10 @@ async function cargarCanchas(horario) {
                 actualizarSemaforoHorario(horario, data.canchas, boton);
             }
         } else {
-            alert('Error: ' + data.message);
+            mostrarNotificacion('❌ Error: ' + data.message);
         }
     } catch (error) {
-        alert('Error al cargar canchas: ' + error.message);
+        mostrarNotificacion('❌ Error al cargar canchas: ' + error.message);
     }
 }
 
@@ -237,18 +283,13 @@ function mostrarCanchas(canchas) {
                 <div class="reserva-info-card">
                     <p><strong>Reservado por:</strong> ${cancha.reserva.nombre}</p>
                     ${cancha.reserva.telefono ? `<p><strong>📞 Teléfono:</strong> ${cancha.reserva.telefono}</p>` : ''}
-                    ${(cancha.reserva.productos_extras && cancha.reserva.precio_extras > 0) ? `
-                        <div style="background-color: #e7f6f8; padding: 8px; border-radius: 5px; margin: 8px 0;">
-                            <p style="margin: 0; font-size: 0.85em; color: #17a2b8;"><strong>🧃 Productos:</strong> ${cancha.reserva.productos_extras}</p>
-                            <p style="margin: 0; font-size: 0.85em; color: #17a2b8;"><strong>💵 Total extras:</strong> $${Math.round(cancha.reserva.precio_extras).toLocaleString('es-AR')}</p>
-                        </div>
-                    ` : ''}
+                    ${generarVistaProductosCancha(cancha.reserva)}
                     ${esFijo ? '<p class="turno-fijo-badge">🔁 Turno Fijo Semanal</p>' : ''}
                     ${esFijo ? `<button class="btn-warning" onclick="marcarAusencia('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})" style="margin-bottom: 10px;">
                         ⚠️ Marcar Ausencia
                     </button>` : ''}
                     <button class="btn-secondary" onclick="abrirModalProductos('${cancha.id}', ${cancha.numero}, ${esFijo}, ${idTurnoFijo})" style="margin-bottom: 10px;">
-                        🛒 Agregar Productos
+                        🛒 ${cancha.reserva.productos_lista && cancha.reserva.productos_lista.length > 0 ? 'Editar' : 'Agregar'} Productos
                     </button>
                     <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})">
                         ❌ ${esFijo ? 'Eliminar Turno Fijo' : 'Cancelar Reserva'}
@@ -301,12 +342,12 @@ async function realizarReserva() {
     const esFijo = document.getElementById('esFijo').checked;
     
     if (!nombreCliente) {
-        alert('Por favor ingrese un nombre');
+        mostrarNotificacion('⚠️ Por favor ingrese un nombre');
         return;
     }
     
     if (!telefonoCliente) {
-        alert('Por favor ingrese un teléfono');
+        mostrarNotificacion('⚠️ Por favor ingrese un teléfono');
         return;
     }
     
@@ -331,16 +372,16 @@ async function realizarReserva() {
         const data = await response.json();
         
         if (data.success) {
-            alert('✅ ' + data.message);
+            mostrarNotificacion('✅ ' + data.message);
             cerrarModal();
             cargarCanchas(horarioSeleccionado);
             // Actualizar todos los semáforos
             setTimeout(() => actualizarTodosSemaforos(), 300);
         } else {
-            alert('❌ ' + data.message);
+            mostrarNotificacion('❌ ' + data.message);
         }
     } catch (error) {
-        alert('Error: ' + error.message);
+        mostrarNotificacion('❌ Error: ' + error.message);
     }
 }
 
@@ -348,11 +389,9 @@ async function cancelarReserva(canchaId, numeroCancha, idTurnoFijo = null) {
     const mensaje = idTurnoFijo 
         ? `¿Eliminar el turno fijo de la Cancha ${numeroCancha}? Se eliminará para todas las semanas.`
         : `¿Cancelar reserva de Cancha ${numeroCancha}?`;
-    
-    if (!confirm(mensaje)) {
-        return;
-    }
-    
+
+    // Eliminado confirm(mensaje)
+
     try {
         const response = await fetch('/api/cancelar_reserva', {
             method: 'POST',
@@ -366,19 +405,19 @@ async function cancelarReserva(canchaId, numeroCancha, idTurnoFijo = null) {
                 id_turno_fijo: idTurnoFijo
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-            alert('✅ ' + data.message);
+            mostrarNotificacion('✅ ' + data.message);
             cargarCanchas(horarioSeleccionado);
             // Actualizar todos los semáforos
             setTimeout(() => actualizarTodosSemaforos(), 300);
         } else {
-            alert('❌ ' + data.message);
+            mostrarNotificacion('❌ ' + data.message);
         }
     } catch (error) {
-        alert('Error: ' + error.message);
+        mostrarNotificacion('❌ Error: ' + error.message);
     }
 }
 
@@ -391,10 +430,10 @@ async function abrirModalTurnosFijos() {
             mostrarTurnosFijos(data.turnos_fijos);
             document.getElementById('modalTurnosFijos').style.display = 'block';
         } else {
-            alert('Error al cargar turnos fijos');
+            mostrarNotificacion('❌ Error al cargar turnos fijos');
         }
     } catch (error) {
-        alert('Error: ' + error.message);
+        mostrarNotificacion('❌ Error: ' + error.message);
     }
 }
 
@@ -432,10 +471,8 @@ function mostrarTurnosFijos(turnos) {
 }
 
 async function eliminarTurnoFijo(idTurno) {
-    if (!confirm('¿Eliminar este turno fijo? Se eliminará para todas las semanas.')) {
-        return;
-    }
-    
+    // Eliminado confirm('¿Eliminar este turno fijo? Se eliminará para todas las semanas.')
+
     try {
         const response = await fetch('/api/cancelar_reserva', {
             method: 'POST',
@@ -446,26 +483,24 @@ async function eliminarTurnoFijo(idTurno) {
                 id_turno_fijo: idTurno
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-            alert('✅ ' + data.message);
+            mostrarNotificacion('✅ ' + data.message);
             abrirModalTurnosFijos(); // Recargar lista
             actualizarTodosSemaforos();
         } else {
-            alert('❌ ' + data.message);
+            mostrarNotificacion('❌ ' + data.message);
         }
     } catch (error) {
-        alert('Error: ' + error.message);
+        mostrarNotificacion('❌ Error: ' + error.message);
     }
 }
 
 async function marcarAusencia(canchaId, numeroCancha, idTurnoFijo) {
-    if (!confirm(`¿Marcar ausencia para esta fecha?\n\nLa cancha ${numeroCancha} quedará disponible solo para hoy, pero el turno fijo se mantendrá para las próximas semanas.`)) {
-        return;
-    }
-    
+    // Eliminado confirm(`¿Marcar ausencia para esta fecha?\n\nLa cancha ${numeroCancha} quedará disponible solo para hoy, pero el turno fijo se mantendrá para las próximas semanas.`)
+
     try {
         const response = await fetch('/api/marcar_ausencia', {
             method: 'POST',
@@ -483,14 +518,14 @@ async function marcarAusencia(canchaId, numeroCancha, idTurnoFijo) {
         const data = await response.json();
         
         if (data.success) {
-            alert('✅ ' + data.message);
+            mostrarNotificacion('✅ ' + data.message);
             cargarCanchas(horarioSeleccionado);
             setTimeout(() => actualizarTodosSemaforos(), 300);
         } else {
-            alert('❌ ' + data.message);
+            mostrarNotificacion('❌ ' + data.message);
         }
     } catch (error) {
-        alert('Error: ' + error.message);
+        mostrarNotificacion('❌ Error: ' + error.message);
     }
 }
 
@@ -515,14 +550,14 @@ async function cancelarAusencia(canchaId, numeroCancha, idTurnoFijo) {
         const data = await response.json();
         
         if (data.success) {
-            alert('✅ ' + data.message);
+            mostrarNotificacion('✅ ' + data.message);
             cargarCanchas(horarioSeleccionado);
             setTimeout(() => actualizarTodosSemaforos(), 300);
         } else {
-            alert('❌ ' + data.message);
+            mostrarNotificacion('❌ ' + data.message);
         }
     } catch (error) {
-        alert('Error: ' + error.message);
+        mostrarNotificacion('❌ Error: ' + error.message);
     }
 }
 
@@ -574,10 +609,10 @@ async function cambiarTema(tema) {
             // Mostrar feedback visual
             mostrarNotificacion(`✨ Tema "${obtenerNombreTema(tema)}" aplicado`);
         } else {
-            alert('❌ ' + data.message);
+            mostrarNotificacion('❌ ' + data.message);
         }
     } catch (error) {
-        alert('Error al cambiar tema: ' + error.message);
+        mostrarNotificacion('❌ Error al cambiar tema: ' + error.message);
     }
 }
 
@@ -589,6 +624,49 @@ function obtenerNombreTema(tema) {
         'noche': 'Noche Morada'
     };
     return nombres[tema] || tema;
+}
+
+function aplicarTamano(tamano) {
+    document.body.setAttribute('data-size', tamano);
+    
+    // Actualizar tarjetas activas en el modal
+    const tarjetas = document.querySelectorAll('.size-card');
+    tarjetas.forEach(card => {
+        if (card.getAttribute('data-size') === tamano) {
+            card.classList.add('active');
+        } else {
+            card.classList.remove('active');
+        }
+    });
+}
+
+async function cambiarTamano(tamano) {
+    try {
+        const response = await fetch('/api/guardar_tamano', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tamano: tamano })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            aplicarTamano(tamano);
+            // Mostrar feedback visual
+            const nombres = {
+                'compacto': 'Compacto',
+                'normal': 'Normal',
+                'grande': 'Grande'
+            };
+            mostrarNotificacion(`📐 Tamaño "${nombres[tamano]}" aplicado`);
+        } else {
+            mostrarNotificacion('❌ ' + data.message);
+        }
+    } catch (error) {
+        mostrarNotificacion('❌ Error al cambiar tamaño: ' + error.message);
+    }
 }
 
 function mostrarNotificacion(mensaje) {
@@ -623,6 +701,10 @@ function abrirModalPersonalizacion() {
     // Marcar tema actual como activo
     const temaActual = document.body.getAttribute('data-theme') || 'clasico';
     aplicarTema(temaActual);
+    
+    // Marcar tamaño actual como activo
+    const tamanoActual = document.body.getAttribute('data-size') || 'normal';
+    aplicarTamano(tamanoActual);
 }
 
 function cerrarModalPersonalizacion() {
@@ -642,6 +724,8 @@ function abrirModalConfiguracion() {
 function cerrarModalConfiguracion() {
     const modal = document.getElementById('modalConfiguracion');
     modal.style.display = 'none';
+    // Auto-actualizar disponibilidad al salir de configuración
+    setTimeout(() => actualizarTodosSemaforos(), 300);
 }
 
 // ============================================
@@ -732,7 +816,7 @@ async function cargarReporteFinanzas() {
         case 'dia':
             const fecha = document.getElementById('fechaFinanzas').value;
             if (!fecha) {
-                alert('Por favor selecciona una fecha');
+                mostrarNotificacion('⚠️ Por favor selecciona una fecha');
                 return;
             }
             fechas = { fecha_desde: fecha, fecha_hasta: fecha };
@@ -743,11 +827,11 @@ async function cargarReporteFinanzas() {
             const fechaDesde = document.getElementById('fechaDesde').value;
             const fechaHasta = document.getElementById('fechaHasta').value;
             if (!fechaDesde || !fechaHasta) {
-                alert('Por favor selecciona ambas fechas');
+                mostrarNotificacion('⚠️ Por favor selecciona ambas fechas');
                 return;
             }
             if (fechaDesde > fechaHasta) {
-                alert('La fecha "Desde" no puede ser posterior a la fecha "Hasta"');
+                mostrarNotificacion('⚠️ La fecha "Desde" no puede ser posterior a la fecha "Hasta"');
                 return;
             }
             fechas = { fecha_desde: fechaDesde, fecha_hasta: fechaHasta };
@@ -757,7 +841,7 @@ async function cargarReporteFinanzas() {
         case 'semanal':
             const semana = document.getElementById('semanaFinanzas').value;
             if (!semana) {
-                alert('Por favor selecciona una semana');
+                mostrarNotificacion('⚠️ Por favor selecciona una semana');
                 return;
             }
             const [año, numSemana] = semana.split('-W');
@@ -769,7 +853,7 @@ async function cargarReporteFinanzas() {
         case 'mensual':
             const mes = document.getElementById('mesFinanzas').value;
             if (!mes) {
-                alert('Por favor selecciona un mes');
+                mostrarNotificacion('⚠️ Por favor selecciona un mes');
                 return;
             }
             const [añoMes, numMes] = mes.split('-');
@@ -794,10 +878,10 @@ async function cargarReporteFinanzas() {
         if (data.success) {
             mostrarReporteFinanzas(data, titulo);
         } else {
-            alert('❌ ' + data.message);
+            mostrarNotificacion('❌ ' + data.message);
         }
     } catch (error) {
-        alert('Error al cargar reporte: ' + error.message);
+        mostrarNotificacion('❌ Error al cargar reporte: ' + error.message);
     }
 }
 
@@ -917,8 +1001,9 @@ function mostrarReporteFinanzas(data) {
 // ============================================
 
 let datosProductosActual = {};
+let listaProductosTemp = []; // Lista temporal de productos en el modal
 
-function abrirModalProductos(canchaId, numeroCancha, esFijo, idTurnoFijo) {
+async function abrirModalProductos(canchaId, numeroCancha, esFijo, idTurnoFijo) {
     datosProductosActual = {
         canchaId: canchaId,
         numeroCancha: numeroCancha,
@@ -934,37 +1019,137 @@ function abrirModalProductos(canchaId, numeroCancha, esFijo, idTurnoFijo) {
         <p><strong>Fecha:</strong> ${new Date(fechaSeleccionada).toLocaleDateString('es-ES')}</p>
     `;
     
-    // Limpiar campos
-    document.getElementById('productosExtrasModal').value = '';
-    document.getElementById('precioExtrasModal').value = '';
+    // Cargar productos existentes de la reserva
+    await cargarProductosExistentes();
+    
+    // Limpiar campos de entrada
+    document.getElementById('nombreProducto').value = '';
+    document.getElementById('precioProducto').value = '';
     
     const modal = document.getElementById('modalProductos');
     modal.style.display = 'block';
 }
 
-function cerrarModalProductos() {
-    const modal = document.getElementById('modalProductos');
-    modal.style.display = 'none';
-    datosProductosActual = {};
+async function cargarProductosExistentes() {
+    // Obtener la reserva actual para cargar sus productos
+    try {
+        const response = await fetch('/api/obtener_disponibilidad', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                horario: datosProductosActual.horario,
+                fecha: datosProductosActual.fecha
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Buscar la cancha específica
+            const cancha = data.canchas.find(c => c.id === datosProductosActual.canchaId);
+            if (cancha && cancha.reserva && cancha.reserva.productos_lista) {
+                listaProductosTemp = [...cancha.reserva.productos_lista];
+            } else {
+                listaProductosTemp = [];
+            }
+            actualizarVistaProductos();
+        }
+    } catch (error) {
+        console.error('Error al cargar productos:', error);
+        listaProductosTemp = [];
+        actualizarVistaProductos();
+    }
 }
 
-// Event listener para formulario de productos
-document.addEventListener('DOMContentLoaded', function() {
-    const formProductos = document.getElementById('formProductos');
-    if (formProductos) {
-        formProductos.addEventListener('submit', function(e) {
-            e.preventDefault();
-            guardarProductos();
-        });
-    }
-});
-
-async function guardarProductos() {
-    const productos = document.getElementById('productosExtrasModal').value.trim();
-    const precio = parseFloat(document.getElementById('precioExtrasModal').value);
+function agregarProductoALista() {
+    const nombre = document.getElementById('nombreProducto').value.trim();
+    const precio = parseFloat(document.getElementById('precioProducto').value);
     
-    if (!productos || precio <= 0) {
-        alert('Por favor ingrese productos y un precio válido');
+    if (!nombre) {
+        mostrarNotificacion('⚠️ Por favor ingrese el nombre del producto');
+        return;
+    }
+    
+    if (!precio || precio <= 0) {
+        mostrarNotificacion('⚠️ Por favor ingrese un precio válido');
+        return;
+    }
+    
+    // Agregar a la lista temporal
+    listaProductosTemp.push({
+        nombre: nombre,
+        precio: precio
+    });
+    
+    // Limpiar campos
+    document.getElementById('nombreProducto').value = '';
+    document.getElementById('precioProducto').value = '';
+    document.getElementById('nombreProducto').focus();
+    
+    // Actualizar vista
+    actualizarVistaProductos();
+}
+
+function eliminarProducto(index) {
+    if (confirm('¿Eliminar este producto?')) {
+        listaProductosTemp.splice(index, 1);
+        actualizarVistaProductos();
+    }
+}
+
+function actualizarVistaProductos() {
+    const contenedor = document.getElementById('listaProductosAgregados');
+    
+    if (listaProductosTemp.length === 0) {
+        contenedor.innerHTML = `
+            <div style="text-align: center; padding: 12px; color: var(--text-light); background: var(--bg-color); border-radius: 8px; font-size: 13px;">
+                📦 No hay productos agregados todavía
+            </div>
+        `;
+        document.getElementById('totalProductos').textContent = '0';
+        return;
+    }
+    
+    let html = '<div style="display: flex; flex-direction: column; gap: 6px;">';
+    let total = 0;
+    
+    listaProductosTemp.forEach((producto, index) => {
+        total += producto.precio;
+        html += `
+            <div style="display: flex; justify-content: space-between; align-items: center; 
+                        background: white; padding: 8px 10px; border-radius: 6px; 
+                        border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
+                    <div style="font-weight: 600; color: var(--text-color); font-size: 13px;">
+                        ${producto.nombre}
+                    </div>
+                    <div style="color: var(--success-color); font-size: 14px; font-weight: bold;">
+                        $${producto.precio.toLocaleString('es-AR')}
+                    </div>
+                </div>
+                <button onclick="eliminarProducto(${index})" 
+                        style="background: var(--accent-color); color: white; border: none; 
+                               padding: 6px 10px; border-radius: 5px; cursor: pointer; 
+                               font-size: 16px; transition: all 0.3s; line-height: 1;"
+                        onmouseover="this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.transform='scale(1)'"
+                        title="Eliminar producto">
+                    🗑️
+                </button>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    contenedor.innerHTML = html;
+    document.getElementById('totalProductos').textContent = total.toLocaleString('es-AR');
+}
+
+async function guardarTodosLosProductos() {
+    if (listaProductosTemp.length === 0) {
+        mostrarNotificacion('⚠️ No hay productos para guardar');
         return;
     }
     
@@ -980,23 +1165,29 @@ async function guardarProductos() {
                 cancha_id: datosProductosActual.canchaId,
                 es_fijo: datosProductosActual.esFijo,
                 id_turno_fijo: datosProductosActual.idTurnoFijo,
-                productos_extras: productos,
-                precio_extras: precio
+                productos_lista: listaProductosTemp
             })
         });
         
         const data = await response.json();
         
         if (data.success) {
-            alert('✅ Productos agregados correctamente');
+            mostrarNotificacion('✅ Productos guardados correctamente');
             cerrarModalProductos();
             cargarCanchas(horarioSeleccionado);
         } else {
-            alert('❌ ' + data.message);
+            mostrarNotificacion('❌ ' + data.message);
         }
     } catch (error) {
-        alert('Error: ' + error.message);
+        mostrarNotificacion('❌ Error: ' + error.message);
     }
+}
+
+function cerrarModalProductos() {
+    const modal = document.getElementById('modalProductos');
+    modal.style.display = 'none';
+    // No limpiamos listaProductosTemp aquí para mantener los productos
+    // Solo se limpia al cargar productos existentes en abrirModalProductos
 }
 
 // ====================================
@@ -1009,13 +1200,13 @@ async function exportarBackup() {
         const data = await response.json();
         
         if (data.success) {
-            const archivos = data.archivos.join('\n  • ');
-            alert(`✅ Backup guardado exitosamente en:\n${data.ruta}\n\nArchivos creados:\n  • ${archivos}\n\n📄 El archivo _LEGIBLE.txt puede abrirse con el Bloc de notas\n📦 El archivo .json se usa para importar`);
+            const archivos = data.archivos.join(', ');
+            mostrarNotificacion(`✅ Backup guardado exitosamente - ${archivos}`);
         } else {
-            alert('❌ Error: ' + data.message);
+            mostrarNotificacion('❌ Error: ' + data.message);
         }
     } catch (error) {
-        alert('Error al exportar: ' + error.message);
+        mostrarNotificacion('❌ Error al exportar: ' + error.message);
     }
 }
 
@@ -1036,7 +1227,7 @@ document.getElementById('formImportarBackup').addEventListener('submit', async f
     const archivo = archivoInput.files[0];
     
     if (!archivo) {
-        alert('Por favor selecciona un archivo');
+        mostrarNotificacion('⚠️ Por favor selecciona un archivo');
         return;
     }
     
@@ -1091,34 +1282,61 @@ document.getElementById('formImportarBackup').addEventListener('submit', async f
 });
 
 // ====================================
-// VERIFICACIÓN DE LICENCIA
+// VERIFICACIÓN DE LICENCIA (Ya no se usa, reemplazada por cargarInfoFooter)
 // ====================================
+// Función eliminada - ahora se usa cargarInfoFooter() que muestra el badge temporal
 
-async function verificarLicencia() {
+// ============================================
+// FUNCIÓN DE FOOTER CON INFO DE LICENCIA
+// ============================================
+
+async function cargarInfoFooter() {
     try {
         const response = await fetch('/api/info_licencia');
         const data = await response.json();
         
+        const licenciaInfo = document.getElementById('licenciaInfo');
+        const badgeLicencia = document.getElementById('badgeLicencia');
+        
         if (data.success && data.valida) {
-            const badge = document.getElementById('licenciaInfo');
-            
             if (data.dias_restantes <= 7) {
                 // Advertencia - licencia por vencer
-                badge.style.display = 'block';
-                badge.style.backgroundColor = '#fff3cd';
-                badge.style.color = '#856404';
-                badge.style.border = '2px solid #ffc107';
-                badge.innerHTML = `⚠️ Licencia: ${data.dias_restantes} días restantes`;
+                licenciaInfo.innerHTML = `Licencia: ${data.dias_restantes} días restantes`;
+                badgeLicencia.style.background = 'linear-gradient(135deg, #ff9800, #f57c00)';
             } else {
                 // Licencia válida
-                badge.style.display = 'block';
-                badge.style.backgroundColor = '#d4edda';
-                badge.style.color = '#155724';
-                badge.style.border = '2px solid #28a745';
-                badge.innerHTML = `✅ Licencia válida hasta ${data.fecha_expiracion}`;
+                licenciaInfo.innerHTML = `Licencia: ${data.dias_restantes} días restantes`;
+                badgeLicencia.style.background = 'linear-gradient(135deg, #4caf50, #388e3c)';
             }
+        } else {
+            licenciaInfo.innerHTML = `${data.mensaje || 'Sin licencia'}`;
+            badgeLicencia.style.background = 'linear-gradient(135deg, #f44336, #d32f2f)';
         }
+        
+        // Ocultar SOLO el badge de licencia después de 10 segundos
+        setTimeout(() => {
+            badgeLicencia.classList.add('hidden');
+            // Remover del DOM después de la animación
+            setTimeout(() => {
+                badgeLicencia.style.display = 'none';
+            }, 500);
+        }, 10000);
+        
     } catch (error) {
-        console.error('Error al verificar licencia:', error);
+        console.error('Error al cargar info de licencia:', error);
+        const licenciaInfo = document.getElementById('licenciaInfo');
+        const badgeLicencia = document.getElementById('badgeLicencia');
+        
+        licenciaInfo.innerHTML = 'Error al verificar';
+        badgeLicencia.style.background = 'linear-gradient(135deg, #9e9e9e, #616161)';
+        
+        // Ocultar badge después de 10 segundos aunque haya error
+        setTimeout(() => {
+            badgeLicencia.classList.add('hidden');
+            setTimeout(() => {
+                badgeLicencia.style.display = 'none';
+            }, 500);
+        }, 10000);
     }
 }
+
