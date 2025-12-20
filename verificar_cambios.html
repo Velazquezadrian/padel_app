@@ -1,0 +1,231 @@
+"<!DOCTYPE html>
+<html lang=\"es\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Verificación de Cambios</title>
+    <link rel=\"stylesheet\" href=\"static/css/styles.css\">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+            background: #f5f7fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #00a86b;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-item {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .test-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .demo-area {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 10px;
+            border: 2px solid #b3d9eb;
+        }
+        .demo-title {
+            text-align: center;
+            color: #0077be;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class=\"container\">
+        <h1>✅ Verificación de Cambios en Turnos Fijos</h1>
+        
+        <div class=\"test-item\">
+            <div class=\"test-title\">📁 Archivo static/js/main.js</div>
+            <div>Verificando función mostrarTurnosFijos...</div>
+            <div id=\"test-js\" class=\"test-result\">Cargando...</div>
+        </div>
+        
+        <div class=\"test-item\">
+            <div class=\"test-title\">🎨 Archivo static/css/styles.css</div>
+            <div>Verificando estilos btn-eliminar-chico...</div>
+            <div id=\"test-css\" class=\"test-result\">Cargando...</div>
+        </div>
+        
+        <div class=\"demo-area\">
+            <h2 class=\"demo-title\">🎯 Demo de los Cambios</h2>
+            
+            <div id=\"listaTurnosFijos\">
+                <!-- Aquí se cargará el demo dinámicamente -->
+            </div>
+            
+            <div style=\"text-align: center; margin-top: 20px; color: #666; font-size: 14px;\">
+                Pasa el mouse sobre el botón 🗑️ para ver el efecto hover
+            </div>
+        </div>
+        
+        <div style=\"text-align: center; margin-top: 30px;\">
+            <button onclick=\"location.reload()\" style=\"background: #00a86b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;\">
+                🔄 Volver a Verificar
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Datos de prueba para el demo
+        const turnosDemo = [
+            {
+                id: 1,
+                dia_nombre: \"Lunes\",
+                horario: \"14:00\",
+                cancha_id: \"cancha_1\",
+                nombre_cliente: \"Juan Pérez\",
+                telefono_cliente: \"+54 9 11 1234-5678\"
+            },
+            {
+                id: 2,
+                dia_nombre: \"Miércoles\",
+                horario: \"16:30\",
+                cancha_id: \"cancha_2\",
+                nombre_cliente: \"María González\",
+                telefono_cliente: \"+54 9 11 8765-4321\"
+            },
+            {
+                id: 3,
+                dia_nombre: \"Viernes\",
+                horario: \"20:00\",
+                cancha_id: \"cancha_3\",
+                nombre_cliente: \"Carlos Rodríguez\",
+                telefono_cliente: null
+            }
+        ];
+        
+        // Función para mostrar turnos fijos (copiada de main.js)
+        function mostrarTurnosFijos(turnos) {
+            const lista = document.getElementById('listaTurnosFijos');
+            
+            if (turnos.length === 0) {
+                lista.innerHTML = '<p style=\"text-align:center; color:#666;\">No hay turnos fijos configurados</p>';
+                return;
+            }
+            
+            let html = '<div class=\"turnos-fijos-lista\">';
+            turnos.forEach(turno => {
+                html += `
+                    <div class=\"turno-fijo-item\">
+                        <div class=\"turno-fijo-info\">
+                            <h4>🔁 ${turno.dia_nombre} - ${turno.horario}</h4>
+                            <p><strong>Cancha:</strong> ${turno.cancha_id.replace('cancha_', '')}</p>
+                            <p><strong>Cliente:</strong> ${turno.nombre_cliente}</p>
+                            ${turno.telefono_cliente ? `<p><strong>📞 Teléfono:</strong> ${turno.telefono_cliente}</p>` : ''}
+                        </div>
+                        <button class=\"btn-eliminar-chico\" onclick=\"alert('Demo: Eliminaría turno fijo ID: ${turno.id}')\" title=\"Eliminar turno fijo\">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            lista.innerHTML = html;
+        }
+        
+        // Verificar archivo main.js
+        fetch('static/js/main.js')
+            .then(response => response.text())
+            .then(content => {
+                const testJs = document.getElementById('test-js');
+                
+                if (content.includes('btn-eliminar-chico') && 
+                    content.includes('function mostrarTurnosFijos') &&
+                    content.includes('title=\"Eliminar turno fijo\"')) {
+                    testJs.innerHTML = '✅ CORRECTO: Función actualizada con botón pequeño y tooltip';
+                    testJs.className = 'test-result success';
+                } else if (content.includes('btn-cancelar') && content.includes('Eliminar')) {
+                    testJs.innerHTML = '❌ ERROR: Todavía usa el botón viejo btn-cancelar';
+                    testJs.className = 'test-result error';
+                } else {
+                    testJs.innerHTML = '⚠️ ADVERTENCIA: No se pudo verificar completamente';
+                    testJs.className = 'test-result error';
+                }
+            })
+            .catch(error => {
+                document.getElementById('test-js').innerHTML = '❌ ERROR: No se pudo leer el archivo';
+                document.getElementById('test-js').className = 'test-result error';
+            });
+        
+        // Verificar archivo styles.css
+        fetch('static/css/styles.css')
+            .then(response => response.text())
+            .then(content => {
+                const testCss = document.getElementById('test-css');
+                
+                if (content.includes('.btn-eliminar-chico') && 
+                    content.includes('width: 36px') && 
+                    content.includes('height: 36px') &&
+                    content.includes('transform: scale(1.1)')) {
+                    testCss.innerHTML = '✅ CORRECTO: Estilos btn-eliminar-chico encontrados con efectos hover';
+                    testCss.className = 'test-result success';
+                } else {
+                    testCss.innerHTML = '❌ ERROR: Estilos btn-eliminar-chico no encontrados';
+                    testCss.className = 'test-result error';
+                }
+            })
+            .catch(error => {
+                document.getElementById('test-css').innerHTML = '❌ ERROR: No se pudo leer el archivo';
+                document.getElementById('test-css').className = 'test-result error';
+            });
+        
+        // Mostrar el demo
+        mostrarTurnosFijos(turnosDemo);
+        
+        // Agregar efectos hover dinámicos
+        setTimeout(() => {
+            document.querySelectorAll('.btn-eliminar-chico').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.1)';
+                    this.style.boxShadow = '0 3px 8px rgba(231, 76, 60, 0.3)';
+                });
+                
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        }, 100);
+    </script>
+</body>
+</html>"

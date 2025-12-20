@@ -67,3 +67,4 @@ test_*.py
 *.bat
 *.vbs
 SERIALES_PRUEBA.txt
+.aider*

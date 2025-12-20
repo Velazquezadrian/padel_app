@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang=\"es\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Demo - Mejoras en Turnos Fijos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #2c3e50;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .demo-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #00a86b;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin: 25px 0 15px 0;
+            border-bottom: 2px solid #00a86b;
+            padding-bottom: 10px;
+        }
+        
+        .demo-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #dfe6e9;
+        }
+        
+        .before-after {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .before, .after {
+            flex: 1;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .before {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+        }
+        
+        .after {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+        
+        .before h3, .after h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+        
+        .before h3 {
+            color: #856404;
+        }
+        
+        .after h3 {
+            color: #155724;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .improvements-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .improvements-list li {
+            padding: 10px 0 10px 35px;
+            margin: 8px 0;
+            position: relative;
+        }
+        
+        .improvements-list li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00a86b;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .btn-back {
+            display: inline-block;
+            background: #00a86b;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .btn-back:hover {
+            background: #008c59;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 168, 107, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class=\"demo-container\">
+        <h1>🎾 Demo: Mejoras en Gestión de Turnos Fijos</h1>
+        
+        <div class=\"demo-section\">
+            <h2>📋 Cambios Realizados</h2>
+            
+            <div class=\"before-after\">
+                <div class=\"before\">
+                    <h3>ANTES</h3>
+                    <div class=\"turno-fijo-item\" style=\"background-color: #f8f9fa; border: 2px solid #dfe6e9; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; gap: 15px;\">
+                        <div class=\"turno-fijo-info\">
+                            <h4 style=\"color: #00a86b; margin-bottom: 10px; font-size: 16px;\">🔁 Lunes - 14:00</h4>
+                            <p style=\"margin: 5px 0; color: #2c3e50; font-size: 14px;\"><strong>Cancha:</strong> 1</p>
+                            <p style=\"margin: 5px 0; color: #2c3e50; font-size: 14px;\"><strong>Cliente:</strong> Juan Pérez</p>
+                            <p style=\"margin: 5px 0; color: #2c3e50; font-size: 14px;\"><strong>📞 Teléfono:</strong> +54 9 11 1234-5678</p>
+                        </div>
+                        <button class=\"btn-cancelar\" style=\"background-color: #e74c3c; color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 10px;\">
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class=\"after\">
+                    <h3>DESPUÉS</h3>
+                    <div class=\"turno-fijo-item\" style=\"background-color: #f8f9fa; border: 2px solid #dfe6e9; border-radius: 10px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;\">
+                        <div class=\"turno-fijo-info\" style=\"flex: 1;\">
+                            <h4 style=\"color: #00a86b; margin-bottom: 8px; font-size: 15px; line-height: 1.3;\">🔁 Lunes - 14:00</h4>
+                            <p style=\"margin: 4px 0; color: #2c3e50; font-size: 13px; line-height: 1.4;\"><strong>Cancha:</strong> 1</p>
+                            <p style=\"margin: 4px 0; color: #2c3e50; font-size: 13px; line-height: 1.4;\"><strong>Cliente:</strong> Juan Pérez</p>
+                            <p style=\"margin: 4px 0; color: #2c3e50; font-size: 13px; line-height: 1.4;\"><strong>📞 Teléfono:</strong> +54 9 11 1234-5678</p>
+                        </div>
+                        <button class=\"btn-eliminar-chico\" style=\"background-color: #e74c3c; color: white; border: none; border-radius: 6px; width: 36px; height: 36px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0; padding: 0;\" title=\"Eliminar turno fijo\">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <ul class=\"improvements-list\">
+                <li><strong>Botón más compacto:</strong> Cambiado de botón grande con texto a botón pequeño con solo icono de basurero</li>
+                <li><strong>Texto reducido:</strong> Disminuido el tamaño de fuente de 14px a 13px para mejor legibilidad</li>
+                <li><strong>Espaciado optimizado:</strong> Reducido padding y márgenes para evitar amontonamiento</li>
+                <li><strong>Mejor alineación:</strong> Cambiado de align-items: center a align-items: flex-start</li>
+                <li><strong>Tooltip agregado:</strong> Botón pequeño incluye tooltip \"Eliminar turno fijo\" para claridad</li>
+                <li><strong>Efectos hover:</strong> Animación de escala al pasar el mouse sobre el botón</li>
+            </ul>
+        </div>
+        
+        <div class=\"demo-section\">
+            <h2>✅ Beneficios de los Cambios</h2>
+            <ul class=\"improvements-list\">
+                <li><strong>Interfaz más limpia:</strong> Menos texto y elementos más compactos</li>
+                <li><strong>Mejor uso del espacio:</strong> Permite mostrar más turnos fijos en pantalla</li>
+                <li><strong>Acción clara:</strong> El icono de basurero es universalmente reconocido</li>
+                <li><strong>Responsive mejorado:</strong> Se adapta mejor a pantallas pequeñas</li>
+                <li><strong>Experiencia de usuario:</strong> Botón más intuitivo con efectos visuales</li>
+                <li><strong>Consistencia visual:</strong> Mantiene la paleta de colores del sistema</li>
+            </ul>
+        </div>
+        
+        <div style=\"text-align: center; margin-top: 30px;\">
+            <a href=\"#\" class=\"btn-back\" onclick=\"window.history.back(); return false;\">← Volver</a>
+        </div>
+    </div>
+    
+    <script>
+        // Demo de efectos hover
+        document.querySelectorAll('.btn-eliminar-chico').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.boxShadow = '0 3px 8px rgba(231, 76, 60, 0.3)';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = 'none';
+            });
+            
+            btn.addEventListener('click', function() {
+                alert('Demo: Este botón eliminaría el turno fijo en la aplicación real');
+            });
+        });
+    </script>
+</body>
+</html>"

@@ -459,8 +459,8 @@ function mostrarTurnosFijos(turnos) {
                     <p><strong>Cliente:</strong> ${turno.nombre_cliente}</p>
                     ${turno.telefono_cliente ? `<p><strong>📞 Teléfono:</strong> ${turno.telefono_cliente}</p>` : ''}
                 </div>
-                <button class="btn-cancelar" onclick="eliminarTurnoFijo(${turno.id})">
-                    🗑️ Eliminar
+                <button class="btn-eliminar-chico" onclick="eliminarTurnoFijo(${turno.id})" title="Eliminar turno fijo">
+                    🗑️
                 </button>
             </div>
         `;
