@@ -318,16 +318,28 @@ function abrirModalReserva(canchaId, numeroCancha) {
     // Mostrar mensaje de día de la semana
     const checkboxFijo = document.getElementById('esFijo');
     const mensajeDia = document.getElementById('diaSemanaMensaje');
-    
-    checkboxFijo.addEventListener('change', function() {
-        if (this.checked) {
-            mensajeDia.textContent = `✓ Se reservará para todos los ${diaSemana} a las ${horarioSeleccionado}`;
-            mensajeDia.style.display = 'block';
-        } else {
-            mensajeDia.style.display = 'none';
+    const grupoCheckbox = checkboxFijo.closest('.checkbox-group');
+
+    // Ocultar por defecto
+    grupoCheckbox.style.display = 'none';
+    checkboxFijo.checked = false;
+    mensajeDia.style.display = 'none';
+
+    // Verificar si ya existe turno fijo para este día, horario y cancha
+    existeTurnoFijo(canchaId, fechaSeleccionada, horarioSeleccionado).then(existe => {
+        if (!existe) {
+            grupoCheckbox.style.display = '';
+            checkboxFijo.addEventListener('change', function() {
+                if (this.checked) {
+                    mensajeDia.textContent = `✓ Se reservará para todos los ${diaSemana} a las ${horarioSeleccionado}`;
+                    mensajeDia.style.display = 'block';
+                } else {
+                    mensajeDia.style.display = 'none';
+                }
+            }, { once: true });
         }
     });
-    
+
     document.getElementById('modalReserva').style.display = 'block';
 }
 
