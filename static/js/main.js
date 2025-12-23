@@ -326,9 +326,34 @@ function abrirModalReserva(canchaId, numeroCancha) {
     checkboxFijo.checked = false;
     mensajeDia.style.display = 'none';
 
-    // Solo mostrar la casilla si NO existe turno fijo para ese día, horario y cancha
+    // Solo mostrar la casilla si NO existe turno fijo para ese día, horario y cancha Y no es un horario de ausencia temporal
     existeTurnoFijo(canchaId, fechaSeleccionada, horarioSeleccionado).then(existe => {
-        if (!existe) {
+        // Si existe turno fijo, ocultar casilla
+        if (existe) {
+            grupoCheckbox.style.display = 'none';
+            checkboxFijo.checked = false;
+            mensajeDia.style.display = 'none';
+            return;
+        }
+        // Verificar si la cancha está disponible por ausencia temporal de turno fijo
+        fetch('/api/obtener_disponibilidad', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ horario: horarioSeleccionado, fecha: fechaSeleccionada })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+            if (data.success) {
+                const cancha = data.canchas.find(c => c.id === canchaId);
+                if (cancha && cancha.turno_fijo_ausente) {
+                    // Es un horario de ausencia temporal, NO permitir crear turno fijo
+                    grupoCheckbox.style.display = 'none';
+                    checkboxFijo.checked = false;
+                    mensajeDia.style.display = 'none';
+                    return;
+                }
+            }
+            // Si no hay turno fijo ni ausencia, mostrar casilla
             grupoCheckbox.style.display = '';
             checkboxFijo.addEventListener('change', function() {
                 if (this.checked) {
@@ -338,11 +363,7 @@ function abrirModalReserva(canchaId, numeroCancha) {
                     mensajeDia.style.display = 'none';
                 }
             }, { once: true });
-        } else {
-            grupoCheckbox.style.display = 'none';
-            checkboxFijo.checked = false;
-            mensajeDia.style.display = 'none';
-        }
+        });
     });
 
     document.getElementById('modalReserva').style.display = 'block';
