@@ -203,7 +203,10 @@ def aplicar_turnos_fijos(fecha, horario, canchas):
                             'id_turno_fijo': turno['id'],
                             'productos_lista': turno.get('productos_lista', []),
                             'productos_extras': turno.get('productos_extras', ''),
-                            'precio_extras': turno.get('precio_extras', 0)
+                            'precio_extras': turno.get('precio_extras', 0),
+                            'precio_base': turno.get('precio_base', 0),
+                            'descuento_aplicado': turno.get('descuento_aplicado', 0),
+                            'precio_final': turno.get('precio_final', turno.get('precio_base', 0))
                         }
                     break
     

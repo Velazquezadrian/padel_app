@@ -87,48 +87,52 @@ async function actualizarTodosSemaforos() {
 }
 
 function generarVistaProductosCancha(reserva) {
-    // Función helper para mostrar productos en la tarjeta de cancha (versión compacta)
-    if (!reserva.productos_lista || reserva.productos_lista.length === 0) {
-        return '';
+    // Muestra base, extras y total en formato compacto, siempre visible
+    let base = reserva.precio_base || 0;
+    let descuento = reserva.descuento_aplicado || 0;
+    let final = reserva.precio_final || base;
+    let extras = reserva.precio_extras || 0;
+    let productos = reserva.productos_lista && reserva.productos_lista.length > 0 ? reserva.productos_lista : [];
+    const mostrarDetalle = productos.length > 0 && productos.length <= 2;
+
+    let html = `<div style="background: #e7f6f8; padding: 8px 10px; border-radius: 6px; margin: 6px 0; border-left: 3px solid #17a2b8; font-size: 0.85em;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>💲Base:</span>
+                <span style="font-weight: bold;">$${base.toLocaleString('es-AR')}</span>
+            </div>`;
+    if (descuento > 0) {
+        html += `<div style="display: flex; justify-content: space-between; align-items: center; color: #e67e22;">
+            <span>Descuento:</span>
+            <span>-$${descuento.toLocaleString('es-AR')}</span>
+        </div>`;
     }
-    
-    const cantidadProductos = reserva.productos_lista.length;
-    const mostrarDetalle = cantidadProductos <= 2; // Solo mostrar detalle si hay 2 o menos productos
-    
-    let html = `
-        <div style="background-color: #e7f6f8; padding: 8px 10px; border-radius: 6px; margin: 6px 0; 
-                    border-left: 3px solid #17a2b8; font-size: 0.85em;">
-    `;
-    
-    if (mostrarDetalle) {
-        // Mostrar lista completa si hay pocos productos
-        reserva.productos_lista.forEach(producto => {
-            html += `
-                <div style="display: flex; justify-content: space-between; color: #0c5460; line-height: 1.3;">
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px;">🛒 ${producto.nombre}</span>
-                    <span style="font-weight: bold; white-space: nowrap;">$${producto.precio.toLocaleString('es-AR')}</span>
-                </div>
-            `;
-        });
-    } else {
-        // Mostrar solo resumen compacto si hay muchos productos
-        html += `
-            <div style="display: flex; justify-content: space-between; align-items: center; color: #0c5460;">
-                <span style="font-weight: 600;">🛒 ${cantidadProductos} productos</span>
-            </div>
-        `;
+    if (productos.length > 0) {
+        if (mostrarDetalle) {
+            productos.forEach(producto => {
+                html += `<div style="display: flex; justify-content: space-between; color: #0c5460; line-height: 1.3;">
+                    <span>🛒 ${producto.nombre}</span>
+                    <span style="font-weight: bold;">$${producto.precio.toLocaleString('es-AR')}</span>
+                </div>`;
+            });
+        } else {
+            html += `<div style="display: flex; justify-content: space-between; color: #0c5460;">
+                <span>🛒 ${productos.length} productos</span>
+            </div>`;
+        }
     }
-    
-    // Total siempre visible pero más compacto
-    html += `
-        <div style="display: flex; justify-content: space-between; font-weight: bold; 
-                    color: #17a2b8; margin-top: 4px; padding-top: 4px; border-top: 1px solid #17a2b8;">
-            <span style="font-size: 0.9em;">Total extras:</span>
-            <span>$${reserva.precio_extras.toLocaleString('es-AR')}</span>
-        </div>
+    if (extras > 0) {
+        html += `<div style="display: flex; justify-content: space-between; color: #17a2b8;">
+            <span>+ Extras:</span>
+            <span>$${extras.toLocaleString('es-AR')}</span>
+        </div>`;
+    }
+    html += `<div style="display: flex; justify-content: space-between; font-weight: bold; color: #229954; border-top: 1px solid #17a2b8; margin-top: 4px; padding-top: 4px;">
+        <span>Total:</span>
+        <span>$${(final + extras).toLocaleString('es-AR')}</span>
     </div>
-    `;
-    
+    </div>
+    </div>`;
     return html;
 }
 
