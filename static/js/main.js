@@ -320,12 +320,13 @@ function abrirModalReserva(canchaId, numeroCancha) {
     const mensajeDia = document.getElementById('diaSemanaMensaje');
     const grupoCheckbox = checkboxFijo.closest('.checkbox-group');
 
-    // Ocultar por defecto
+
+    // Por defecto ocultar la casilla
     grupoCheckbox.style.display = 'none';
     checkboxFijo.checked = false;
     mensajeDia.style.display = 'none';
 
-    // Verificar si ya existe turno fijo para este día, horario y cancha
+    // Solo mostrar la casilla si NO existe turno fijo para ese día, horario y cancha
     existeTurnoFijo(canchaId, fechaSeleccionada, horarioSeleccionado).then(existe => {
         if (!existe) {
             grupoCheckbox.style.display = '';
@@ -337,6 +338,10 @@ function abrirModalReserva(canchaId, numeroCancha) {
                     mensajeDia.style.display = 'none';
                 }
             }, { once: true });
+        } else {
+            grupoCheckbox.style.display = 'none';
+            checkboxFijo.checked = false;
+            mensajeDia.style.display = 'none';
         }
     });
 
