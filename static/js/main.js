@@ -226,6 +226,18 @@ function mostrarCanchas(canchas) {
         // Verificar si es turno fijo ausente
         if (cancha.turno_fijo_ausente) {
             canchaDiv.className = 'cancha-card turno-fijo-ausente';
+            let productosHtml = '';
+            let tieneReservaTemporal = (
+                typeof cancha.reserva === 'object' &&
+                Object.keys(cancha.reserva).length > 0
+            );
+            if (
+                tieneReservaTemporal &&
+                Array.isArray(cancha.reserva.productos_lista) &&
+                cancha.reserva.productos_lista.length > 0
+            ) {
+                productosHtml = generarVistaProductosCancha(cancha.reserva);
+            }
             canchaDiv.innerHTML = `
                 <div class="cancha-header">
                     <h3>Cancha ${cancha.numero}</h3>
@@ -241,9 +253,16 @@ function mostrarCanchas(canchas) {
                     ${cancha.turno_fijo_ausente.telefono ? `<p><strong>📞:</strong> ${cancha.turno_fijo_ausente.telefono}</p>` : ''}
                     <p class="ausencia-text">⚠️ Marcado como ausente para hoy</p>
                 </div>
-                <button class="btn-reservar" onclick="abrirModalReserva('${cancha.id}', ${cancha.numero})">
-                    ✅ Reservar (Temporal)
-                </button>
+                ${productosHtml}
+                ${tieneReservaTemporal ? `
+                    <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero})">
+                        ❌ Cancelar reserva temporal
+                    </button>
+                ` : `
+                    <button class="btn-reservar" onclick="abrirModalReserva('${cancha.id}', ${cancha.numero})">
+                        ✅ Reservar (Temporal)
+                    </button>
+                `}
                 <button class="btn-secondary" onclick="abrirModalProductos('${cancha.id}', ${cancha.numero}, false, null)" style="margin: 10px 0 0 0;">
                     🛒 Agregar Productos
                 </button>
