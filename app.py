@@ -1,3 +1,12 @@
+from flask import Flask, render_template, request, jsonify, send_file
+from datetime import datetime, timedelta
+import json
+import os
+import sys
+from io import BytesIO
+from licencia_manager import LicenciaManager
+
+
 # ================================================================================
 # SISTEMA DE TURNOS DE PADEL - BACKEND (Flask)
 # ================================================================================
@@ -727,6 +736,111 @@ def api_reporte_finanzas():
         return jsonify({
             'success': True,
             'fecha': fecha,
+            'resumen': {
+                'total_recaudado': total_recaudado,
+                'turnos_regulares': turnos_regulares_count,
+                'turnos_fijos': turnos_fijos_count,
+                'total_turnos': turnos_regulares_count + turnos_fijos_count,
+                'total_descuentos': total_descuentos,
+                'total_extras': total_extras,
+                'descuento_promocion_actual': config.get('descuento_promocion', 0)
+            },
+            'detalle': detalle_turnos
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+# Nuevo endpoint: Reporte financiero por rango de fechas
+@app.route('/api/finanzas/reporte_rango', methods=['POST'])
+def api_reporte_finanzas_rango():
+    """Genera reporte financiero para un rango de fechas (varios días, semana, mes)"""
+    try:
+        data = request.get_json()
+        fecha_desde = data.get('fecha_desde')
+        fecha_hasta = data.get('fecha_hasta')
+        if not fecha_desde or not fecha_hasta:
+            return jsonify({'success': False, 'message': 'Faltan fechas'}), 400
+
+        reservas = cargar_reservas()
+        turnos_fijos = cargar_turnos_fijos()
+        ausencias = cargar_ausencias()
+        config = cargar_config()
+
+        # Convertir a objetos datetime
+        desde = datetime.strptime(fecha_desde, '%Y-%m-%d')
+        hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d')
+
+        total_recaudado = 0
+        turnos_regulares_count = 0
+        turnos_fijos_count = 0
+        total_descuentos = 0
+        total_extras = 0
+        detalle_turnos = []
+
+        # Recorrer cada día del rango
+        dia_actual = desde
+        while dia_actual <= hasta:
+            fecha_str = dia_actual.strftime('%Y-%m-%d')
+            dia_semana = dia_actual.weekday()
+
+            # Turnos fijos de ese día
+            for turno_fijo in turnos_fijos:
+                if turno_fijo['dia_semana'] == dia_semana:
+                    clave_ausencia = f"{fecha_str}_{turno_fijo['horario']}_{turno_fijo['cancha_id']}"
+                    esta_ausente = any(a['clave'] == clave_ausencia for a in ausencias)
+                    if not esta_ausente:
+                        precio_final = turno_fijo.get('precio_final', turno_fijo.get('precio_base', config.get('precio_turno_fijo', 9000)))
+                        descuento = turno_fijo.get('descuento_aplicado', 0)
+                        precio_extras = turno_fijo.get('precio_extras', 0)
+                        total_recaudado += precio_final + precio_extras
+                        total_descuentos += descuento
+                        total_extras += precio_extras
+                        turnos_fijos_count += 1
+                        detalle_turnos.append({
+                            'tipo': 'Turno Fijo',
+                            'horario': turno_fijo['horario'],
+                            'cancha': turno_fijo['cancha_id'],
+                            'cliente': turno_fijo['nombre_cliente'],
+                            'precio_base': turno_fijo.get('precio_base', config.get('precio_turno_fijo', 9000)),
+                            'descuento': descuento,
+                            'precio_final': precio_final,
+                            'productos_extras': turno_fijo.get('productos_extras', ''),
+                            'precio_extras': precio_extras,
+                            'fecha': fecha_str
+                        })
+
+            # Reservas regulares de ese día
+            for clave_fecha_hora, canchas in reservas.items():
+                if clave_fecha_hora.startswith(fecha_str):
+                    for cancha_id, reserva in canchas.items():
+                        if not reserva.get('es_fijo', False):
+                            horario = clave_fecha_hora.split('_')[1]
+                            precio_final = reserva.get('precio_final', reserva.get('precio_base', config.get('precio_turno_regular', 10000)))
+                            descuento = reserva.get('descuento_aplicado', 0)
+                            precio_extras = reserva.get('precio_extras', 0)
+                            total_recaudado += precio_final + precio_extras
+                            total_descuentos += descuento
+                            total_extras += precio_extras
+                            turnos_regulares_count += 1
+                            detalle_turnos.append({
+                                'tipo': 'Turno Regular',
+                                'horario': horario,
+                                'cancha': cancha_id,
+                                'cliente': reserva['nombre'],
+                                'precio_base': reserva.get('precio_base', config.get('precio_turno_regular', 10000)),
+                                'descuento': descuento,
+                                'precio_final': precio_final,
+                                'productos_extras': reserva.get('productos_extras', ''),
+                                'precio_extras': precio_extras,
+                                'fecha': fecha_str
+                            })
+
+            dia_actual += timedelta(days=1)
+
+        return jsonify({
+            'success': True,
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
             'resumen': {
                 'total_recaudado': total_recaudado,
                 'turnos_regulares': turnos_regulares_count,
