@@ -128,9 +128,31 @@
                             💾 Guardar Configuración
                         </button>
                     </div>
+
+                    <div class="form-actions" style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="btn-secondary" onclick="exportarBackup()">
+                            📤 Exportar Backup
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="abrirModalImportarBackup()">
+                            📥 Importar Backup
+                        </button>
+                    </div>
                 </form>
 
                 <div id="mensaje" class="mensaje" style="display: none;"></div>
+
+                <!-- Modal Importar Backup (reutilizado) -->
+                <div id="modalImportarBackup" class="modal">
+                    <div class="modal-content" style="max-width: 400px;">
+                        <span class="close" onclick="cerrarModalImportarBackup()">&times;</span>
+                        <h2>📥 Importar Backup</h2>
+                        <form id="formImportarBackup">
+                            <input type="file" id="archivoBackup" name="archivoBackup" accept=".zip,.json" required style="margin-bottom: 15px;">
+                            <button type="submit" class="btn-primary">Importar</button>
+                        </form>
+                        <div id="mensajeImportarBackup" style="margin-top: 10px; display: none;"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="config-preview">

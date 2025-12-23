@@ -1,4 +1,5 @@
 """
+
 Script de diagnóstico para app_escritorio.py
 """
 

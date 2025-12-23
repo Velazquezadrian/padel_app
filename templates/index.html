@@ -362,7 +362,7 @@
                 </div>
 
                 <!-- Opción Backup -->
-                <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 20px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;" onclick="window.location.href='/backup';" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 20px; border-radius: 12px; cursor: pointer; transition: transform 0.2s;" onclick="abrirModalBackup(); cerrarModalConfiguracion();" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)';">
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <div style="font-size: 2.5em;">💾</div>
                         <div>
@@ -379,23 +379,31 @@
         </div>
     </div>
 
-    <!-- Modal Importar Backup -->
+
+    <!-- Modal Backup (exportar/importar) -->
+    <div id="modalBackup" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close" onclick="cerrarModalBackup()">&times;</span>
+            <h2 style="margin-bottom: 20px;">💾 Backup y Restauración</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <button onclick="exportarBackup()" class="btn-primary" style="font-size: 1.1em;">📤 Exportar Backup</button>
+                <button onclick="abrirModalImportarBackup()" class="btn-secondary" style="font-size: 1.1em;">📥 Importar Backup</button>
+            </div>
+
+    <!-- Modal Importar Backup (restaurado) -->
     <div id="modalImportarBackup" class="modal">
         <div class="modal-content" style="max-width: 500px;">
-            <h2 style="margin-bottom: 20px;">📤 Importar Backup</h2>
-
+            <span class="close" onclick="cerrarModalImportarBackup()">&times;</span>
+            <h2 style="margin-bottom: 20px;">📥 Importar Backup</h2>
             <div style="background-color: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
                 <strong>⚠️ ADVERTENCIA:</strong> Esta acción reemplazará todos los datos actuales.
             </div>
-
             <form id="formImportarBackup" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="archivoBackup">Seleccionar archivo JSON:</label>
-                    <input type="file" id="archivoBackup" name="archivo" accept=".json" required style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;">
+                    <input type="file" id="archivoBackup" name="archivo" accept=".json" required style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; background: #fff;">
                 </div>
-
                 <div id="mensajeImportarBackup" style="display: none; padding: 10px; border-radius: 8px; margin-top: 15px;"></div>
-
                 <div class="form-actions" style="margin-top: 20px;">
                     <button type="submit" class="btn-primary">✅ Confirmar Importación</button>
                     <button type="button" class="btn-secondary" onclick="cerrarModalImportarBackup()">Cancelar</button>
@@ -403,17 +411,7 @@
             </form>
         </div>
     </div>
-
-    <!-- Botones discretos de backup -->
-    <div class="backup-buttons">
-        <button onclick="exportarBackup()" class="btn-backup-discrete" title="Exportar turnos a archivo JSON">
-            <span class="backup-icon">💾</span>
-            <span class="backup-text">Exportar</span>
-        </button>
-        <button onclick="abrirModalImportarBackup()" class="btn-backup-discrete" title="Importar turnos desde archivo JSON">
-            <span class="backup-icon">📥</span>
-            <span class="backup-text">Importar</span>
-        </button>
+        </div>
     </div>
 
     <!-- Badge de licencia temporal (10 segundos) -->
