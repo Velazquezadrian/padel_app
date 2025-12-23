@@ -244,6 +244,9 @@ function mostrarCanchas(canchas) {
                 <button class="btn-reservar" onclick="abrirModalReserva('${cancha.id}', ${cancha.numero})">
                     ✅ Reservar (Temporal)
                 </button>
+                <button class="btn-secondary" onclick="abrirModalProductos('${cancha.id}', ${cancha.numero}, false, null)" style="margin: 10px 0 0 0;">
+                    🛒 Agregar Productos
+                </button>
                 <button class="btn-secondary" onclick="cancelarAusencia('${cancha.id}', ${cancha.numero}, ${cancha.turno_fijo_ausente.id_turno_fijo})" style="margin-top: 10px;">
                     🔄 Restaurar Turno Fijo
                 </button>
