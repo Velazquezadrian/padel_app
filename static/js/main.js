@@ -362,9 +362,6 @@ function mostrarCanchas(canchas) {
                         ✅ Reservar (Temporal)
                     </button>
                 `}
-                <button class="btn-secondary" onclick="abrirModalProductos('${cancha.id}', ${cancha.numero}, false, null)" style="margin: 10px 0 0 0;">
-                    🛒 Agregar Productos
-                </button>
                 <button class="btn-secondary" onclick="cancelarAusencia('${cancha.id}', ${cancha.numero}, ${cancha.turno_fijo_ausente.id_turno_fijo})" style="margin-top: 10px;">
                     🔄 Restaurar Turno Fijo
                 </button>
@@ -406,12 +403,9 @@ function mostrarCanchas(canchas) {
                     ${cancha.reserva.telefono ? `<p><strong>📞 Teléfono:</strong> ${cancha.reserva.telefono}</p>` : ''}
                     ${generarVistaProductosCancha(cancha.reserva)}
                     ${esFijo ? '<p class="turno-fijo-badge">🔁 Turno Fijo Semanal</p>' : ''}
-                    ${esFijo ? `<button class="btn-warning" onclick="marcarAusencia('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})" style="margin-bottom: 10px;">
-                        ⚠️ Marcar Ausencia
-                    </button>` : ''}
-                    <button class="btn-secondary" onclick="abrirModalProductos('${cancha.id}', ${cancha.numero}, ${esFijo}, ${idTurnoFijo})" style="margin-bottom: 10px;">
-                        🛒 ${cancha.reserva.productos_lista && cancha.reserva.productos_lista.length > 0 ? 'Editar' : 'Agregar'} Productos
-                    </button>
+                        ${esFijo ? `<button class="btn-warning" onclick="marcarAusencia('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})" style="margin-bottom: 10px;">
+                            ⚠️ Marcar Ausencia
+                        </button>` : ''}
                     <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})">
                         ❌ ${esFijo ? 'Eliminar Turno Fijo' : 'Cancelar Reserva'}
                     </button>
