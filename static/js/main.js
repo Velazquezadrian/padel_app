@@ -354,9 +354,14 @@ function mostrarCanchas(canchas) {
                 </div>
                 ${productosHtml}
                 ${tieneReservaTemporal ? `
-                    <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero})">
-                        ❌ Cancelar reserva temporal
-                    </button>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn-secondary" onclick="abrirModalProductos('${cancha.id}', ${cancha.numero}, false, null)">
+                            🛒 Agregar Productos
+                        </button>
+                        <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero})">
+                            ❌ Cancelar reserva temporal
+                        </button>
+                    </div>
                 ` : `
                     <button class="btn-reservar" onclick="abrirModalReserva('${cancha.id}', ${cancha.numero})">
                         ✅ Reservar (Temporal)
@@ -406,9 +411,14 @@ function mostrarCanchas(canchas) {
                         ${esFijo ? `<button class="btn-warning" onclick="marcarAusencia('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})" style="margin-bottom: 10px;">
                             ⚠️ Marcar Ausencia
                         </button>` : ''}
-                    <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})">
-                        ❌ ${esFijo ? 'Eliminar Turno Fijo' : 'Cancelar Reserva'}
-                    </button>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                        <button class="btn-secondary" onclick="abrirModalProductos('${cancha.id}', ${cancha.numero}, ${esFijo}, ${idTurnoFijo})">
+                            🛒 Agregar Productos
+                        </button>
+                        <button class="btn-cancelar" onclick="cancelarReserva('${cancha.id}', ${cancha.numero}, ${idTurnoFijo})">
+                            ❌ ${esFijo ? 'Eliminar Turno Fijo' : 'Cancelar Reserva'}
+                        </button>
+                    </div>
                 </div>
             `;
         }

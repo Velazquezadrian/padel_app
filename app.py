@@ -159,6 +159,54 @@ def guardar_tema(tema, tamano=None):
     with open(TEMA_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=4)
 
+def _recalcular_precio_turno_fijo(config, turno):
+    """Recalcula precios de un turno fijo según configuración actual."""
+    precio_base_cfg = config.get('precio_turno_fijo', 9000)
+    descuento_pct = config.get('descuento_promocion', 0)
+    descuento_aplicado = precio_base_cfg * (descuento_pct / 100)
+    precio_final = precio_base_cfg - descuento_aplicado
+
+    turno['precio_base'] = precio_base_cfg
+    turno['descuento_porcentaje'] = descuento_pct
+    turno['descuento_aplicado'] = descuento_aplicado
+    turno['precio_final'] = precio_final
+    return turno
+
+
+def _actualizar_turnos_fijos_con_config(config):
+    """Actualiza todos los turnos fijos persistidos con los precios vigentes."""
+    turnos_fijos = cargar_turnos_fijos()
+    if not turnos_fijos:
+        return
+
+    turnos_actualizados = []
+    for turno in turnos_fijos:
+        turnos_actualizados.append(_recalcular_precio_turno_fijo(config, turno))
+
+    guardar_turnos_fijos(turnos_actualizados)
+
+
+def _actualizar_reservas_con_config(config):
+    """Actualiza reservas puntuales con precios vigentes (no toca productos)."""
+    reservas = cargar_reservas()
+    if not reservas:
+        return
+
+    for clave, canchas in reservas.items():
+        for cancha_id, reserva in canchas.items():
+            if reserva.get('es_fijo', False):
+                continue
+            precio_base = config.get('precio_turno_regular', 10000)
+            descuento_pct = config.get('descuento_promocion', 0)
+            descuento_aplicado = precio_base * (descuento_pct / 100)
+            precio_final = precio_base - descuento_aplicado
+            reserva['precio_base'] = precio_base
+            reserva['descuento_porcentaje'] = descuento_pct
+            reserva['descuento_aplicado'] = descuento_aplicado
+            reserva['precio_final'] = precio_final
+
+    guardar_reservas(reservas)
+
 # ================================================================================
 # FUNCIONES HELPER - Lógica de negocio reutilizable
 # ================================================================================
@@ -175,10 +223,12 @@ def aplicar_turnos_fijos(fecha, horario, canchas):
     ausencias = cargar_ausencias()
     fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
     dia_semana = fecha_obj.weekday()  # 0=Lunes, 6=Domingo
+    config = cargar_config()
     
     # Recorrer todos los turnos fijos configurados
     for turno in turnos_fijos:
         if turno['dia_semana'] == dia_semana and turno['horario'] == horario:
+            turno = _recalcular_precio_turno_fijo(config, turno)
             # Verificar si hay una ausencia marcada para esta fecha específica
             clave_ausencia = f"{fecha}_{horario}_{turno['cancha_id']}"
             tiene_ausencia = any(a['clave'] == clave_ausencia for a in ausencias)
@@ -205,6 +255,7 @@ def aplicar_turnos_fijos(fecha, horario, canchas):
                             'productos_extras': turno.get('productos_extras', ''),
                             'precio_extras': turno.get('precio_extras', 0),
                             'precio_base': turno.get('precio_base', 0),
+                            'descuento_porcentaje': turno.get('descuento_porcentaje', config.get('descuento_promocion', 0)),
                             'descuento_aplicado': turno.get('descuento_aplicado', 0),
                             'precio_final': turno.get('precio_final', turno.get('precio_base', 0))
                         }
@@ -222,6 +273,10 @@ def generar_horarios(hora_inicio, hora_fin, duracion):
     horarios = []
     inicio = datetime.strptime(hora_inicio, '%H:%M')
     fin = datetime.strptime(hora_fin, '%H:%M')
+
+    # Permitir horarios de cierre que cruzan medianoche (ej: 23:00 -> 00:30)
+    if fin <= inicio:
+        fin += timedelta(days=1)
     
     actual = inicio
     while actual < fin:
@@ -258,9 +313,23 @@ def guardar_configuracion():
             'cantidad_canchas': int(data['cantidad_canchas']),
             'horario_inicio': data['horario_inicio'],
             'horario_fin': data['horario_fin'],
-            'duracion_turno': int(data['duracion_turno'])
+            'duracion_turno': int(data['duracion_turno']),
+            'precio_turno_regular': int(data.get('precio_turno_regular', 0)),
+            'precio_turno_fijo': int(data.get('precio_turno_fijo', 0)),
+            'descuento_promocion': int(data.get('descuento_promocion', 0))
         }
+
+        # Validaciones básicas
+        if config['cantidad_canchas'] < 1:
+            raise ValueError('La cantidad de canchas debe ser al menos 1')
+        if config['precio_turno_regular'] < 0 or config['precio_turno_fijo'] < 0:
+            raise ValueError('Los precios no pueden ser negativos')
+        if not 0 <= config['descuento_promocion'] <= 100:
+            raise ValueError('El descuento debe estar entre 0 y 100')
+
         guardar_config(config)
+        _actualizar_turnos_fijos_con_config(config)
+        _actualizar_reservas_con_config(config)
         return jsonify({'success': True, 'message': 'Configuración guardada correctamente'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400

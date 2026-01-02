@@ -87,7 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
             cantidad_canchas: document.getElementById('cantidad_canchas').value,
             horario_inicio: document.getElementById('horario_inicio').value,
             horario_fin: document.getElementById('horario_fin').value,
-            duracion_turno: document.getElementById('duracion_turno').value
+            duracion_turno: document.getElementById('duracion_turno').value,
+            precio_turno_regular: document.getElementById('precio_turno_regular').value,
+            precio_turno_fijo: document.getElementById('precio_turno_fijo').value,
+            descuento_promocion: document.getElementById('descuento_promocion').value
         };
         
         try {
@@ -146,7 +149,10 @@ function calcularCantidadTurnos(inicio, fin, duracion) {
     
     const minutosInicio = horaInicio * 60 + minInicio;
     const minutosFin = horaFin * 60 + minFin;
-    
-    const totalMinutos = minutosFin - minutosInicio;
+
+    // Si el cierre es menor o igual al inicio, asumimos que cruza medianoche
+    const totalMinutos = (minutosFin <= minutosInicio)
+        ? (minutosFin + 24 * 60) - minutosInicio
+        : minutosFin - minutosInicio;
     return Math.floor(totalMinutos / duracion);
 }
